@@ -1,170 +1,418 @@
-# NAVISYNC — Intelligent Navigation Beyond GNSS 🚀
-> **SIH 2026 Problem Statement 26168 Solution**: *AI-ML based Intelligent Dead Reckoning for Seamless Vehicle Navigation during GNSS Outages.*
+# PS 26168 — SIH HACKATHON 2026
 
-[![React](https://img.shields.io/badge/Frontend-React%2018%20%7C%20Vite%20%7C%20Three.js-00E5FF?style=for-the-badge&logo=react)](https://react.dev/)
-[![FastAPI](https://img.shields.io/badge/Backend-FastAPI%20%7C%20Python%203.10-059669?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![TensorFlow](https://img.shields.io/badge/AI--Model-Keras%20%7C%20TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow)](https://tensorflow.org/)
-[![SIH 2026](https://img.shields.io/badge/SIH-2026%20PS%2026168-7C3AED?style=for-the-badge)](https://sih.gov.in/)
+# NAVISYNC 🛰️
 
----
+### AI-Enhanced Intelligent Dead Reckoning for Continuous Vehicle Navigation
 
-## 📌 Executive Summary
+> **When GNSS disappears, NAVISYNC keeps you moving.**
 
-In urban canyons, tunnels, underpasses, and dense foliage, **GNSS (GPS) signals frequently drop out or experience heavy multipath interference**. Traditional Inertial Navigation Systems (INS) using naive double integration of IMU sensor data suffer from **exponential positional error drift** within seconds.
-
-**NAVISYNC** solves this critical problem by deploying a **Deep Neural Network (DNN) Intelligent Dead Reckoning (IDR) Engine**. By processing high-frequency 6-axis IMU inputs (3-axis Accelerometer + 3-axis Gyroscope), the AI model predicts velocity vectors and motion constraints to bound positional error drift under **87.4% error reduction**, providing continuous, uninterrupted vehicle localization even during prolonged 120s+ GNSS blackouts.
+NAVISYNC is a software-based Intelligent Dead Reckoning (IDR) system that uses smartphone IMU sensors and AI/ML to maintain continuous vehicle positioning during GNSS outages. Developed for **Smart India Hackathon 2026 — ISRO | PS 26168**.
 
 ---
 
-## 🌟 Key Features
+## 👥 Team Details
 
-### 1. 🌆 3D Cyber Streetview Engine
-- Native **Three.js** WebGL environment featuring multi-story building blocks, double-yellow road dividers, moving 3D vehicles (Sedans & Limousines), double-head street lamps, and 3D street vegetation (trees & bushes).
-- Interactive scroll-driven cinematic camera descent.
+**Team Name:** RuntimeRebels  
+**Team Leader:** [@vidushikochharug24-sud](https://github.com/vidushikochharug24-sud)
 
-### 2. 🗺️ 2D High-Clarity Trajectory Canvas
-- Top-down orthographic tracking canvas rendering **3 trajectory paths**:
-  - 🟢 **Ground Truth (Dashed Green Line)**: Reference true GPS trajectory.
-  - 🔴 **Naive IMU Drift (Solid Red Line)**: Uncorrected inertial navigation veering heavily during outages.
-  - 🔵 **AI IDR Correction (Solid Blue Line)**: Deep learning model prediction tracking tightly alongside Ground Truth.
-- **Smooth GNSS Restoration Line Merging**: Clicking `Restore GNSS` smoothly curves and merges the Cyan/Blue AI trajectory directly back into the Green Ground Truth line.
-
-### 3. 📊 Full Telemetry Dashboard & Controls
-- Real-time kinematic telemetry cards (Accel Magnitude, Gyro Magnitude, Speed, Displacement Error, Drift Reduction %).
-- Controls: `Start`, `Pause`, `Reset`, `Simulate Outage`, `Restore GNSS`, Outage Duration dropdown (15s–120s).
-- **Relaxed Pacing**: 1.2s per step playback pacing for clear observation.
-
-### 4. 📁 Custom CSV Dataset Uploader
-- User-facing file selector & drag-and-drop parser for custom `.csv` trajectory files in the Navigation Engine page.
-- Supports `x, y`, `gt_x, gt_y`, `longitude, latitude`, or numeric column indexes.
+### Team Members
+- **MEMBER_1** — 2024UIC3648 — [@aryanbansal2124](https://github.com/aryanbansal2124)
+- **MEMBER_2** — 2024UEC2633 — [@vidushikochharug24-sud](https://github.com/vidushikochharug24-sud)
+- **MEMBER_3** — 2024UEC2616 — [@palaksachdeva](https://github.com/palaksachdeva)
+- **MEMBER_4** — —
+- **MEMBER_5** — —
+- **MEMBER_6** — —
 
 ---
 
-## 🛠️ System Architecture
+## 🔗 Project Links
+- **SIH Presentation:** Coming Soon
+- **Video Demonstration:** Coming Soon
+- **Live Dashboard:** Coming Soon
 
-```mermaid
-graph TD
-    A[6-axis IMU Telemetry<br>Accel AX/AY/AZ + Gyro GX/GY/GZ] --> B[FastAPI Backend Engine]
-    B --> C[Pre-trained Keras Deep Neural Network]
-    C --> D[Predicted Velocity Vectors & Position Fixes]
-    D --> E[React + Three.js WebGL Frontend]
-    E --> F[2D Trajectory Canvas & 3D Streetview HUD]
+---
+
+## 🚗 The Problem
+
+GNSS signals can become unavailable in:
+- Underground tunnels
+- Multi-level parking structures
+- Dense urban areas
+- Forested roads
+- Deep valleys
+- GNSS-denied or interference environments
+
+A smartphone can still measure motion using its **accelerometer, gyroscope and magnetometer**, but directly integrating noisy IMU measurements causes positional error to accumulate rapidly.
+
+**NAVISYNC addresses this challenge using AI-enhanced inertial odometry, sensor fusion, drift correction and map constraints.**
+
+---
+
+## 💡 Our Approach
+
+NAVISYNC follows a multi-stage navigation pipeline that transforms raw smartphone sensor data into a continuous, corrected vehicle trajectory.
+
+```text
+Smartphone IMU + GNSS
+          │
+          ▼
+┌──────────────────┐
+│  Preprocessing   │
+│  & Calibration   │
+└─────────┬────────┘
+          ▼
+┌──────────────────┐
+│ Phone Alignment  │
+│ Pitch/Roll/Yaw   │
+└─────────┬────────┘
+          ▼
+┌──────────────────┐
+│ AI Speed Filter  │
+└─────────┬────────┘
+          ▼
+┌──────────────────┐
+│ AI Odometry      │
+└─────────┬────────┘
+          ▼
+┌──────────────────┐
+│ Dead Reckoning   │
+└─────────┬────────┘
+          ▼
+┌──────────────────┐
+│ AI Drift Correct │
+└─────────┬────────┘
+          ▼
+┌──────────────────┐
+│ GNSS + INS Fusion│
+└─────────┬────────┘
+          ▼
+┌──────────────────┐
+│ Map Matching+NHC │
+└─────────┬────────┘
+          ▼
+   Vehicle Position
+```
+
+### 1. Preprocessing & Calibration
+Raw smartphone IMU measurements are cleaned and prepared through:
+- Sensor synchronization and resampling
+- Gravity removal
+- Stationary-period bias calibration
+- Sensor noise reduction
+- Coordinate transformation
+- Detection of abnormal motion and vibration
+
+### 2. Phone Alignment
+The system estimates the smartphone's pitch, roll and yaw relative to the vehicle's direction of travel and transforms the sensor measurements into a vehicle-relative coordinate frame.
+
+### 3. AI Speed & Vibration Filtering
+The system handles disturbances caused by:
+- Engine vibrations
+- Road bumps
+- Potholes
+- Sudden braking
+- Phone movement
+- Sensor noise
+
+A lightweight AI model learns vehicle motion patterns from smartphone IMU data to estimate forward velocity while filtering unwanted motion.
+
+### 4. AI Inertial Odometry
+Instead of relying only on double integration of noisy acceleration, NAVISYNC uses a sequence-based ML model to predict short-term vehicle displacement.
+
+```text
+IMU Data Window ↓ AI Model ↓ Δx , Δy ↓ Trajectory Update
+```
+
+### 5. Dead Reckoning
+When GNSS becomes unavailable, the system uses the last reliable position together with AI-estimated motion and vehicle heading to continuously propagate the vehicle's position.
+
+```text
+Last Known GNSS Position + AI Estimated Motion + Vehicle Heading ↓ Estimated Position
+```
+
+### 6. AI Drift Correction
+Inertial navigation naturally accumulates errors. NAVISYNC estimates residual errors and applies learned corrections to reduce positional drift.
+
+```text
+Raw Dead Reckoning ↓ Drift Estimation ↓ AI Correction ↓ Improved Trajectory
+```
+
+### 7. GNSS + INS Fusion
+When GNSS is available, NAVISYNC combines GNSS measurements with inertial and AI-based estimates.
+
+During GNSS loss:
+```text
+GNSS unavailable ↓ IMU + AI ↓ Dead Reckoning
+```
+When GNSS returns, the system smoothly corrects the estimated trajectory rather than producing an abrupt position jump.
+
+### 8. Map Matching & Non-Holonomic Constraints
+The estimated trajectory is constrained using road-network information such as OpenStreetMap (OSM). Vehicle motion constraints are also applied to prevent physically unrealistic trajectories.
+
+```text
+AI Estimated Trajectory ↓ Road Network + NHC ↓ Map Matching ↓ Physically Consistent Path
 ```
 
 ---
 
-## 📁 Repository Structure
+## 🔄 Complete Navigation Pipeline
 
-```
-SIH_2026_PS_26168/
-├── README.md                      # Project documentation
-├── .gitignore                     # Git ignore configuration
-└── idr_prototype/
-    ├── backend/                   # Python FastAPI AI Inference Service
-    │   ├── main.py                # FastAPI routes & API endpoints
-    │   ├── fusion.py              # Extended Kalman Filter & sensor fusion
-    │   ├── inference.py           # Keras model inference wrapper
-    │   ├── model.keras            # Trained IDR Deep Learning Model
-    │   ├── preprocessing.py       # IMU windowing & normalization
-    │   └── requirements.txt       # Python dependencies
-    └── frontend/                  # React 18 + Vite + Three.js App
-        ├── public/
-        │   ├── navisync_logo.png  # Branding assets
-        │   ├── V-vtb1.csv         # VTB-1 Highway Dataset
-        │   └── V-vtb2.csv         # VTB-2 Urban Dataset
-        ├── src/
-        │   ├── components/
-        │   │   ├── LandingPage.tsx           # Hero section & intro overlay
-        │   │   ├── TrajectoryPanel.tsx       # Navigation Engine console & controls
-        │   │   ├── WebGLTrajectoryCanvas.tsx # 2D Top-down orthographic map
-        │   │   └── CyberHighwayCanvas.tsx    # 3D Streetview canvas
-        │   ├── App.tsx                       # Main application view switcher
-        │   └── state/replayStore.ts          # Zustand state management
-        ├── package.json
-        └── vite.config.ts
-```
-
----
-
-## ⚡ Quickstart Guide
-
-### Prerequisites
-- **Node.js**: v18.0.0 or higher
-- **Python**: v3.10 or higher
-- **Git**
-
----
-
-### 1. Backend Setup (FastAPI + Python)
-
-```bash
-# Navigate to the backend directory
-cd idr_prototype/backend
-
-# Create virtual environment (optional)
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install backend dependencies
-pip install -r requirements.txt
-
-# Start the FastAPI server on port 8000
-python -m uvicorn main:app --port 8000 --reload
+```text
+Smartphone IMU + GNSS
+          │
+          ▼
+Preprocessing & Calibration
+          │
+          ▼
+Phone Alignment (Pitch / Roll / Yaw)
+          │
+          ▼
+AI Speed & Vibration Filter
+          │
+          ▼
+AI Inertial Odometry (Δx / Δy)
+          │
+          ▼
+Dead Reckoning
+          │
+          ▼
+AI Drift Correction
+          │
+          ▼
+GNSS + INS Fusion
+          │
+          ▼
+Map Matching + NHC
+          │
+          ▼
+Continuous Position
 ```
 
-Backend will be active at: **`http-[# 🚀 Quick Command to Push README to GitHub
-
-If you want to update your GitHub repository right now, execute:
-
-```bash
-git add README.md
-git commit -m "docs: add comprehensive SIH 2026 README documentation"
-git push origin main
-```//127.0.0.1:8000`**
-
 ---
 
-### 2. Frontend Setup (React + Vite + Three.js)
+## 🔄 Navigation Modes
 
-```bash
-# Navigate to the frontend directory
-cd idr_prototype/frontend
-
-# Install node dependencies
-npm install
-
-# Start the development server on port 5173
-npm run dev
+### 🟢 GNSS + INS
+Normal navigation when GNSS is available.
+```text
+GNSS + IMU + AI ↓ Fused Position
 ```
 
-Frontend will be active at: **`http://localhost:5173`**
+### 🟠 Dead Reckoning
+Navigation continues using IMU and AI when GNSS is unavailable.
+```text
+IMU + AI ↓ Dead Reckoning ↓ Map Matching ↓ Estimated Position
+```
+
+### 🔵 GNSS Re-acquisition
+When GNSS returns, the system smoothly re-fuses the measurements.
+```text
+GNSS + INS + AI ↓ Smooth Correction ↓ Stable Navigation
+```
 
 ---
 
-## 📊 Custom CSV File Format
+## 📊 Dataset
 
-You can upload your own trajectory data in the **Navigation Engine** page using the **`Upload CSV`** button. The CSV parser accepts numeric columns formatted as:
+The initial models are trained and tested using:
+**IO-VNBD** — Inertial and Odometry benchmark dataset for ground vehicle positioning  
+Dataset link: [https://github.com/onyekpeu/IO-VNBD](https://github.com/onyekpeu/IO-VNBD)
 
-| timestamp | gt_x | gt_y | accel_x | accel_y | gyro_z |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| 0.0 | 0.00 | 0.00 | 0.02 | 0.01 | 0.001 |
-| 0.1 | 2.50 | 0.12 | 0.45 | 0.03 | 0.004 |
-| 0.2 | 5.01 | 0.28 | 0.42 | -0.01 | 0.002 |
-
-*Note: If specific coordinate column names are not present, the parser automatically defaults to the first two numeric columns for 2D position mapping.*
-
----
-
-## 🏆 Innovation Highlights
-
-- **87.4% Reduction in Positional Drift** compared to uncorrected IMU integration.
-- **Sub-meter Relative Accuracy** across 120-second continuous GNSS outages.
-- **Edge Architecture Compatible**: Lightweight inference engine suitable for automotive head units & smartphone edge deployment.
+The dataset is used for:
+- IMU preprocessing
+- Model training
+- Validation
+- Inertial odometry experiments
+- Trajectory evaluation
+- Drift analysis
 
 ---
 
-## 📄 License & Team
+## 🛠️ Technology Stack
 
-Developed for **Smart India Hackathon (SIH) 2026** — *Problem Statement ID 26168*.
+### Machine Learning
+- Python
+- PyTorch
+- NumPy
+- Pandas
+- Scikit-learn
+- GRU / LSTM / BiLSTM
 
-- **Repository**: [vidushikochharug24-sud/SIH_2026_PS_26168](https://github.com/vidushikochharug24-sud/SIH_2026_PS_26168)
+### Navigation & Signal Processing
+- IMU signal processing
+- Sensor calibration
+- Coordinate transformations
+- Inertial odometry
+- Dead reckoning
+- Kalman filtering
+- GNSS + INS fusion
+- Map matching
+- Non-Holonomic Constraints
+
+### Mobile Application
+- Android
+- Kotlin
+- Android Sensor APIs
+- GNSS / Location APIs
+- On-device ML inference
+
+### Web Dashboard
+- React
+- TypeScript
+- Interactive map visualization
+- Real-time telemetry
+- Trajectory visualization
+
+### Mapping
+- OpenStreetMap
+- Offline road-network data
+
+---
+
+## 🖥️ NAVISYNC Dashboard
+
+The NAVISYNC web dashboard visualizes the navigation engine and model inference. It is designed to display:
+- GNSS status
+- IMU telemetry
+- Vehicle velocity
+- Vehicle heading
+- Ground-truth trajectory
+- AI-estimated trajectory
+- Position error
+- Drift
+- Navigation mode
+- GNSS blackout and recovery
+
+---
+
+## 📱 Mobile Application
+
+The final system is designed around a smartphone-based navigation application capable of:
+- Reading smartphone IMU sensors
+- Reading GNSS when available
+- Detecting GNSS outages
+- Estimating vehicle motion
+- Switching to dead reckoning
+- Applying AI-based corrections
+- Performing map matching
+- Displaying continuous vehicle position
+- Re-fusing GNSS when the signal returns
+
+---
+
+## 🏗️ System Architecture
+
+```text
+┌───────────────────┐
+│ Smartphone / IMU  │
+│ Accelerometer     │
+│ Gyroscope         │
+│ Magnetometer      │
+│ GNSS              │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ Preprocessing     │
+│ Calibration       │
+│ Coordinate Trans  │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ AI Motion Estimator│
+│ Velocity /Δx /Δy  │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ Dead Reckoning    │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ Drift Correction  │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ GNSS + INS Fusion │
+└─────────┬─────────┘
+          │
+          ▼
+┌───────────────────┐
+│ Map Matching+NHC  │
+└─────────┬─────────┘
+          │
+          ▼
+ Continuous Position
+```
+
+---
+
+## 🔬 Development Pipeline
+
+```text
+IO-VNBD Dataset ↓ Data Exploration ↓ Preprocessing ↓ Baseline Dead Reckoning ↓ AI Model Training ↓ Velocity / Δx / Δy Prediction ↓ Drift Analysis ↓ GNSS + INS Fusion ↓ Map Matching ↓ Edge Optimization ↓ Mobile Deployment
+```
+
+---
+
+## 📈 Evaluation
+
+NAVISYNC is evaluated using:
+- Position error
+- Trajectory error
+- Drift percentage
+- Velocity estimation error
+- GNSS outage performance
+- Model inference latency
+
+### Drift Metric
+$$\text{Drift (\%)} = \frac{\text{Position Error}}{\text{Distance Travelled}} \times 100$$
+
+The SIH problem statement specifies a target of keeping dead-reckoning positional drift below 10% of the total distance travelled during GNSS-denied operation.
+
+---
+
+## 🚀 Development Status
+
+| Component | Status |
+| :--- | :--- |
+| Project architecture | 🟢 Completed |
+| IO-VNBD dataset identification | 🟢 Completed |
+| Web dashboard prototype | 🟢 Completed |
+| Data preprocessing | 🟢 Completed |
+| Baseline dead reckoning | 🟢 Completed |
+| AI velocity estimation | 🟢 Completed |
+| AI displacement estimation | 🟢 Completed |
+| Drift correction | 🟢 Completed |
+| GNSS + INS fusion | 🟢 Completed |
+| Map matching | 🟡 In Progress |
+| Android application | ⚪ Planned |
+| Edge deployment | ⚪ Planned |
+
+---
+
+## 🎯 Smart India Hackathon 2026
+
+- **Problem Statement:** AI-ML based Intelligent Dead Reckoning System for Seamless Navigation
+- **Organization:** Indian Space Research Organisation (ISRO)
+- **Category:** Software
+- **Problem Statement ID:** PS 26168
+- **Hackathon:** Smart India Hackathon 2026
+
+---
+
+## 🌐 Vision
+
+NAVISYNC aims to make vehicle navigation resilient to GNSS outages by combining:
+**AI + IMU + GNSS + Inertial Navigation + Map Intelligence**
+
+Instead of treating GNSS loss as a navigation failure:
+```text
+GNSS disappears ↓ NAVISYNC takes over ↓ Vehicle keeps moving ↓ GNSS returns ↓ NAVISYNC smoothly re-fuses
+```
+
+**NAVISYNC — AI-Powered Navigation Beyond GNSS.**  
+**👥 RuntimeRebels** — *Building navigation that doesn't stop when GNSS does.*
