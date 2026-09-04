@@ -41,7 +41,8 @@ export const TrajectoryPanel: React.FC = () => {
   const fetchTrip = useCallback(async (trip: string) => {
     setLoading(true); setTripData(null); setLocalStep(0); setShowDrAiLines(false); setIsGnssRestored(false);
     try {
-      const res = await fetch(`http://localhost:8000/api/trajectory/${trip}`);
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const res = await fetch(`${baseUrl}/api/trajectory/${trip}`);
       if (!res.ok) throw new Error(`Server error ${res.status}`);
       const d: TrajectoryData = await res.json();
       setTripData(d);
