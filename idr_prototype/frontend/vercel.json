@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "cd idr_prototype/frontend && npm install && npm run build",
-  "outputDirectory": "idr_prototype/frontend/dist",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
     {
