@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background: #0B0E17;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+.font-display {
+  font-family: 'Instrument Serif', 'Playfair Display', Georgia, serif;
+}
+
+/* Map Backdrop Layer */
+.map-bg-overlay {
+  background-image: radial-gradient(rgba(11, 14, 23, 0.75) 0%, rgba(11, 14, 23, 0.95) 100%), 
+                    url('https://tile.openstreetmap.org/15/5241/12664.png');
+  background-size: cover;
+  background-position: center;
+}
+
+/* Sleek Dark Slate Card */
+.slate-card {
+  background: rgba(18, 22, 34, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.slate-card:hover {
+  border-color: rgba(46, 230, 166, 0.3);
+}
+
+/* Status Pulsing Animations */
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(46, 230, 166, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(46, 230, 166, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(46, 230, 166, 0); }
+}
+
+@keyframes pulse-violet {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+  50% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.badge-pulse-green {
+  animation: pulse-green 2.5s infinite;
+}
+
+.badge-pulse-violet {
+  animation: pulse-violet 1.2s infinite;
+}
+
+/* Custom Scrollbar */
+.terminal-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.terminal-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+.terminal-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(139, 111, 217, 0.3);
+  border-radius: 4px;
+}
