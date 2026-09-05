@@ -79,7 +79,7 @@ export const LandingPage: React.FC = () => {
             onClick={handleStartZoomTransition}
             className="fixed inset-0 z-50 bg-[#04060c] flex flex-col justify-center items-center px-4 select-none cursor-pointer overflow-hidden"
           >
-            {/* Centered Full-Screen Video 5 Layer */}
+            {/* Centered Full-Screen Video 5 Layer with Enhanced Visibility */}
             <video
               ref={video5Ref}
               autoPlay
@@ -89,7 +89,7 @@ export const LandingPage: React.FC = () => {
               preload="auto"
               onCanPlay={(e) => e.currentTarget.play().catch(() => {})}
               onWaiting={(e) => e.currentTarget.play().catch(() => {})}
-              className="absolute inset-0 w-full h-full object-cover object-center opacity-25 scale-105 pointer-events-none"
+              className="absolute inset-0 w-full h-full object-cover object-center opacity-55 scale-105 pointer-events-none"
             >
               <source src="/video5.mp4" type="video/mp4" />
             </video>
