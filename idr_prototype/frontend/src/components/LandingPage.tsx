@@ -59,9 +59,9 @@ export const LandingPage: React.FC = () => {
       }
       prevMouseRef.current = { x, y };
 
-      // Append trailing particles
+      // Append trailing particles (extended trail length)
       setTrail((prev) => [
-        ...prev.slice(-12),
+        ...prev.slice(-28),
         { x, y, id: Date.now() + Math.random() },
       ]);
     };
@@ -111,7 +111,7 @@ export const LandingPage: React.FC = () => {
             onClick={handleStartZoomTransition}
             className="fixed inset-0 z-50 bg-[#04060c] flex flex-col justify-center items-center px-4 select-none cursor-none overflow-hidden"
           >
-            {/* Centered Full-Screen Video 5 Layer with Enhanced Visibility */}
+            {/* Centered Full-Screen Video 5 Layer (Always Visible & Crisp) */}
             <video
               ref={video5Ref}
               autoPlay
@@ -121,40 +121,40 @@ export const LandingPage: React.FC = () => {
               preload="auto"
               onCanPlay={(e) => e.currentTarget.play().catch(() => {})}
               onWaiting={(e) => e.currentTarget.play().catch(() => {})}
-              className="absolute inset-0 w-full h-full object-cover object-center opacity-55 scale-105 pointer-events-none"
+              className="absolute inset-0 w-full h-full object-cover object-center opacity-75 scale-105 pointer-events-none"
             >
               <source src="/video5.mp4" type="video/mp4" />
             </video>
 
-            {/* Background Infinite Image Carousel Strip */}
-            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 opacity-35 pointer-events-none overflow-hidden flex z-0 py-4">
+            {/* Base Background Infinite Image Carousel Strip (Always Visible - Not Black) */}
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 opacity-75 pointer-events-none overflow-hidden flex z-0 py-4">
               <motion.div
                 animate={{ x: ['0%', '-50%'] }}
                 transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
                 className="flex gap-6 min-w-max px-4"
               >
                 {['/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg'].map((imgSrc, i) => (
-                  <div key={i} className="w-72 h-44 sm:w-96 sm:h-56 md:w-[420px] md:h-64 rounded-3xl overflow-hidden border border-white/20 shadow-[0_0_25px_rgba(0,229,255,0.15)] bg-black/50 flex-shrink-0">
-                    <img src={imgSrc} alt={`Carousel ${i}`} className="w-full h-full object-cover opacity-70 transition-transform duration-500" />
+                  <div key={i} className="w-72 h-44 sm:w-96 sm:h-56 md:w-[420px] md:h-64 rounded-3xl overflow-hidden border border-white/30 shadow-[0_0_30px_rgba(0,229,255,0.25)] bg-black/40 flex-shrink-0">
+                    <img src={imgSrc} alt={`Carousel ${i}`} className="w-full h-full object-cover opacity-90 transition-transform duration-500" />
                   </div>
                 ))}
               </motion.div>
             </div>
 
-            {/* Interactive Spotlight Radial Reveal Layer (Curtains up opacity under cursor) */}
+            {/* Interactive Cyan Spotlight Beam (Follows cursor, adds vivid glow without blackening outer background) */}
             <div
               className="absolute inset-0 pointer-events-none z-1"
               style={{
-                background: `radial-gradient(280px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0, 229, 255, 0.15) 0%, rgba(4, 6, 12, 0.45) 50%, rgba(4, 6, 12, 0.85) 100%)`,
+                background: `radial-gradient(360px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0, 229, 255, 0.22) 0%, rgba(46, 230, 166, 0.08) 45%, transparent 80%)`,
               }}
             />
 
-            {/* Secondary High-Brightness Carousel Layer Revealed Exclusively Under Cursor Spotlight */}
+            {/* High-Contrast Spotlight Carousel Overlay (Amplifies brightness under cursor spotlight lens) */}
             <div
               className="absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none overflow-hidden flex z-2 py-4"
               style={{
-                WebkitMaskImage: `radial-gradient(220px circle at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
-                maskImage: `radial-gradient(220px circle at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
+                WebkitMaskImage: `radial-gradient(320px circle at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
+                maskImage: `radial-gradient(320px circle at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
               }}
             >
               <motion.div
@@ -163,16 +163,15 @@ export const LandingPage: React.FC = () => {
                 className="flex gap-6 min-w-max px-4"
               >
                 {['/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg'].map((imgSrc, i) => (
-                  <div key={i} className="w-72 h-44 sm:w-96 sm:h-56 md:w-[420px] md:h-64 rounded-3xl overflow-hidden border-2 border-[#00E5FF] shadow-[0_0_50px_rgba(0,229,255,0.8)] bg-black flex-shrink-0">
+                  <div key={i} className="w-72 h-44 sm:w-96 sm:h-56 md:w-[420px] md:h-64 rounded-3xl overflow-hidden border-2 border-[#00E5FF] shadow-[0_0_60px_rgba(0,229,255,0.9)] bg-black flex-shrink-0">
                     <img src={imgSrc} alt={`Spotlight Carousel ${i}`} className="w-full h-full object-cover opacity-100 scale-105" />
                   </div>
                 ))}
               </motion.div>
             </div>
 
-            {/* Lightweight Ambient Vignette Overlay */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(4,6,12,0.15)_0%,rgba(4,6,12,0.85)_100%)] pointer-events-none z-5" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#04060c] via-transparent to-[#04060c]/60 pointer-events-none z-5" />
+            {/* Subtle Non-Obscuring Ambient Vignette */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#04060c]/40 via-transparent to-[#04060c]/40 pointer-events-none z-5" />
 
             {/* Central Spaced Ultra-Transparent Glass Container Box */}
             <div className="relative z-10 bg-[#060913]/35 backdrop-blur-md border border-white/25 rounded-3xl p-6 sm:p-8 md:p-10 shadow-[0_0_90px_rgba(0,229,255,0.3)] flex flex-col items-center justify-center max-w-2xl text-center mx-4 my-auto group">
@@ -241,16 +240,17 @@ export const LandingPage: React.FC = () => {
 
             </div>
 
-            {/* ── NEON GPS NAVIGATION ARROW CURSOR & SUBTLE TRAIL ── */}
+            {/* ── EXTENDED NEON GPS NAVIGATION ARROW CURSOR & TRAIL ── */}
             <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-              {/* Subtle Cyan Particles Trail */}
+              {/* Glowing Cyan Breadcrumb Particles Trail */}
               {trail.map((p, idx) => {
-                const size = 3 + (idx / trail.length) * 5;
-                const opacity = (idx / trail.length) * 0.45;
+                const ratio = idx / trail.length;
+                const size = 3 + ratio * 7;
+                const opacity = ratio * 0.75;
                 return (
                   <div
                     key={p.id}
-                    className="absolute rounded-full bg-[#00E5FF] shadow-[0_0_10px_#00E5FF]"
+                    className="absolute rounded-full bg-[#00E5FF] shadow-[0_0_12px_#00E5FF]"
                     style={{
                       left: p.x - size / 2,
                       top: p.y - size / 2,
@@ -272,8 +272,8 @@ export const LandingPage: React.FC = () => {
                 }}
               >
                 <div className="relative flex items-center justify-center">
-                  <Navigation className="w-6 h-6 text-[#00E5FF] fill-[#00E5FF]/40 filter drop-shadow-[0_0_8px_#00E5FF]" />
-                  <div className="absolute w-2 h-2 rounded-full bg-white shadow-[0_0_6px_#fff]" />
+                  <Navigation className="w-6 h-6 text-[#00E5FF] fill-[#00E5FF]/50 filter drop-shadow-[0_0_12px_#00E5FF]" />
+                  <div className="absolute w-2 h-2 rounded-full bg-white shadow-[0_0_8px_#fff]" />
                 </div>
               </div>
             </div>
