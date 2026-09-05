@@ -253,7 +253,7 @@ export const LandingPage: React.FC = () => {
         />
 
         {/* ── SECTION 1: HERO ENTRY (Cyan-to-Emerald Gradient Title) ───── */}
-        <section className="relative z-10 min-h-screen flex flex-col justify-center items-center px-4 text-center max-w-4xl mx-auto pt-12">
+        <section id="hero" className="relative z-10 min-h-screen flex flex-col justify-center items-center px-4 text-center max-w-4xl mx-auto pt-24">
           
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#3b82f6]/15 border border-[#3b82f6]/40 text-[#00E5FF] text-xs font-semibold mb-6">
             <Zap className="w-4 h-4 text-[#00E5FF] animate-pulse" />
@@ -292,7 +292,7 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* ── SECTION 3: CONTINUOUS ENGINE PIPELINE ──────────────────────── */}
-        <div className="relative z-10">
+        <div id="pipeline" className="relative z-10 pt-16">
           <EnginePipelineSection />
         </div>
 
@@ -307,12 +307,12 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* ── SECTION 6: DRIFT COMPARISON ────────────────────────────────── */}
-        <div className="relative z-10">
+        <div id="dr" className="relative z-10 pt-16">
           <DriftComparisonSection />
         </div>
 
         {/* ── SECTION 7: MAP MATCHING & ROAD CONSTRAINTS ────────────────── */}
-        <div className="relative z-10">
+        <div id="map-matching" className="relative z-10 pt-16">
           <MapMatchingSection />
         </div>
 
@@ -322,7 +322,7 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* ── SECTION 10: QUANTITATIVE BENCHMARK RESULTS ────────────────── */}
-        <div className="relative z-10">
+        <div id="benchmarks" className="relative z-10 pt-16">
           <ResultsBenchmarkSection />
         </div>
 
