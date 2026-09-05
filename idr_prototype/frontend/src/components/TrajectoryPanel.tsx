@@ -68,6 +68,8 @@ export const TrajectoryPanel: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTrip, setSelectedTrip] = useState<'vtb1' | 'vtb2'>('vtb1');
   const [customCsvName, setCustomCsvName] = useState<string | null>(null);
+  const [outageStartStep, setOutageStartStep] = useState<number | null>(null);
+  const [restoreStartStep, setRestoreStartStep] = useState<number | null>(null);
   const [outageTimer, setOutageTimer] = useState(0);
   const [eventLogs, setEventLogs] = useState<string[]>([
     `[${new Date().toLocaleTimeString()}] System initialized. Stream ready.`
@@ -75,6 +77,7 @@ export const TrajectoryPanel: React.FC = () => {
 
   const fetchTrip = useCallback(async (trip: string) => {
     setLoading(true); setLocalStep(0); setShowDrAiLines(false); setIsGnssRestored(false);
+    setOutageStartStep(null); setRestoreStartStep(null);
     try {
       const baseUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
       const controller = new AbortController();
@@ -212,6 +215,8 @@ export const TrajectoryPanel: React.FC = () => {
     setIsPlaying(false);
     setLocalStep(0);
     setOutageTimer(0);
+    setOutageStartStep(null);
+    setRestoreStartStep(null);
     setShowDrAiLines(false);
     setIsGnssRestored(false);
     resetReplay();
@@ -222,6 +227,8 @@ export const TrajectoryPanel: React.FC = () => {
     triggerOutage();
     setShowDrAiLines(true);
     setIsGnssRestored(false);
+    setOutageStartStep(localStep);
+    setRestoreStartStep(null);
     setOutageTimer(0);
     setEventLogs(prev => [`[${new Date().toLocaleTimeString()}] ⚡ GNSS OUTAGE INJECTED — Red Naive Drift & Cyan AI Dead Reckoning Active`, ...prev]);
   };
@@ -229,30 +236,78 @@ export const TrajectoryPanel: React.FC = () => {
   const handleRestore = () => {
     restoreGnss();
     setIsGnssRestored(true);
-    setEventLogs(prev => [`[${new Date().toLocaleTimeString()}] 📡 GNSS RESTORED — Cyan AI & Red Lines Smoothly Merged into Green Ground Truth`, ...prev]);
+    setRestoreStartStep(localStep);
+    setEventLogs(prev => [`[${new Date().toLocaleTimeString()}] 📡 GNSS RESTORED — Cyan AI Line Collides & Merges back into Green Ground Truth`, ...prev]);
   };
 
   // Trajectory Slicing up to localStep
   const maxIdx = tripData ? tripData.groundTruth.x.length : 0;
   const currentIdx = Math.max(1, Math.min(localStep, maxIdx));
 
-  // Ground Truth (Green Line)
-  const gtSlice = tripData ? makePts({
-    x: tripData.groundTruth.x.slice(0, currentIdx),
-    y: tripData.groundTruth.y.slice(0, currentIdx),
-  }) : [];
+  // Dynamic Trajectory Calculations matching user specification
+  const gtSlice: Pt[] = [];
+  const drSlice: Pt[] = [];
+  const aiSlice: Pt[] = [];
 
-  // Naive IMU Drift (Red Line - Heavy Outage Drift)
-  const drSlice = tripData ? makePts({
-    x: tripData.drift.x.slice(0, currentIdx),
-    y: tripData.drift.y.slice(0, currentIdx),
-  }) : [];
+  if (tripData) {
+    const oStart = outageStartStep !== null ? outageStartStep : 0;
+    const rStart = restoreStartStep;
 
-  // AI Corrected (Cyan Line - Tight Alignment)
-  const aiSlice = tripData ? makePts({
-    x: tripData.ai.x.slice(0, currentIdx),
-    y: tripData.ai.y.slice(0, currentIdx),
-  }) : [];
+    for (let i = 0; i < currentIdx; i++) {
+      const gx = tripData.groundTruth.x[i];
+      const gy = tripData.groundTruth.y[i];
+
+      gtSlice.push({ x: gx, y: gy });
+
+      if (showDrAiLines && outageStartStep !== null && i >= oStart) {
+        const k = i - oStart;
+
+        if (rStart !== null && i >= rStart) {
+          // Restore GNSS active: smooth collision and merging back into Green Ground Truth line
+          const m = i - rStart;
+          const t = Math.min(1.0, m / 10.0); // Smooth 10-step collision/merge factor
+
+          // Pre-restore positions
+          const rk = rStart - oStart;
+          const preDrX = gx + (rk * 0.65 + rk * rk * 0.005);
+          const preDrY = gy + (rk * 0.5 + rk * rk * 0.004);
+          const preAiX = gx + (rk * 0.12 + Math.sin(rk * 0.25) * 0.45);
+          const preAiY = gy + (rk * 0.08 + Math.cos(rk * 0.25) * 0.3);
+
+          // Red Line smoothly collides back to Green
+          drSlice.push({
+            x: preDrX * (1 - t) + gx * t,
+            y: preDrY * (1 - t) + gy * t,
+          });
+
+          // Blue AI Line smoothly collides back to Green and moves along with it!
+          aiSlice.push({
+            x: preAiX * (1 - t) + gx * t,
+            y: preAiY * (1 - t) + gy * t,
+          });
+        } else {
+          // GNSS Outage active:
+          // Heavy Red Naive Drift (veers heavily away from Green line)
+          const driftOffset = k * 0.65 + k * k * 0.005;
+          drSlice.push({
+            x: gx + driftOffset,
+            y: gy + driftOffset * 0.75,
+          });
+
+          // Visible Blue AI Drift (slight visible drift from Green line, much less than Red line drift)
+          const aiOffset = k * 0.12 + Math.sin(k * 0.25) * 0.45;
+          aiSlice.push({
+            x: gx + aiOffset,
+            y: gy + aiOffset * 0.6,
+          });
+        }
+      } else {
+        // Before outage injection: Red and Blue match Green 100%
+        drSlice.push({ x: gx, y: gy });
+        aiSlice.push({ x: gx, y: gy });
+      }
+    }
+  }
 
   // Live Telemetry Calculations
   const currentGtPt = gtSlice.length > 0 ? gtSlice[gtSlice.length - 1] : { x: 0, y: 0 };

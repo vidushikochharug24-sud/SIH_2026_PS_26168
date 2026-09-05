@@ -168,27 +168,9 @@ export const WebGLTrajectoryCanvas: React.FC<WebGLTrajectoryCanvasProps> = ({
         addGlowingSolidLine(drPts, '#ef4444', 0.1);
       }
 
-      // Solid Glowing Blue Line (AI Corrected Path - Tracks closely alongside Green line)
+      // Solid Glowing Blue Line (AI Corrected Path)
       if (aiPts.length >= 2) {
-        let displayAiPts = [...aiPts];
-
-        // Smooth merging on Restore GNSS
-        if (isRestored) {
-          const N = displayAiPts.length;
-          const mergeSteps = Math.min(25, N);
-          displayAiPts = displayAiPts.map((pt, idx) => {
-            if (idx >= N - mergeSteps && idx < gtPts.length) {
-              const t = (idx - (N - mergeSteps)) / mergeSteps;
-              return {
-                x: pt.x * (1 - t) + gtPts[idx].x * t,
-                y: pt.y * (1 - t) + gtPts[idx].y * t,
-              };
-            }
-            return pt;
-          });
-        }
-
-        addGlowingSolidLine(displayAiPts, '#3b82f6', 0.2);
+        addGlowingSolidLine(aiPts, '#3b82f6', 0.2);
       }
     }
 
