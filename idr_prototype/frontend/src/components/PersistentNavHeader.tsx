@@ -62,20 +62,20 @@ export const PersistentNavHeader: React.FC<PersistentNavHeaderProps> = ({
       animate={{ y: 0, opacity: 1 }}
       className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-[#06151a]/90 border-b border-[#00E5FF]/20 px-4 md:px-8 py-2.5 flex items-center justify-between font-sans shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
     >
-      {/* ── LEFT: NAVISYNC BRAND LOGO (Matching media_1788641440393.jpg) ── */}
+      {/* ── LEFT: NAVISYNC BRAND LOGO (Matching media_1788642093344.png emblem) ── */}
       <div
         onClick={() => setStoreView('landing')}
         className="flex items-center gap-3 cursor-pointer select-none group"
       >
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-[#00E5FF]/40 bg-black/60 shadow-[0_0_15px_rgba(0,229,255,0.3)] flex-shrink-0 group-hover:scale-105 transition-transform">
-          <img src="/navisync_logo.jpg" alt="NAVISYNC Logo" className="w-full h-full object-cover" />
+        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl overflow-hidden border border-[#00E5FF]/40 bg-black/90 shadow-[0_0_20px_rgba(0,229,255,0.4)] flex-shrink-0 group-hover:scale-105 transition-transform flex items-center justify-center p-0.5">
+          <img src="/navisync_logo.png" alt="NAVISYNC Satellite Emblem Logo" className="w-full h-full object-contain" />
         </div>
         <div className="flex flex-col">
-          <div className="font-black italic tracking-tighter text-lg sm:text-xl leading-none flex items-center gap-1 drop-shadow-[0_0_12px_rgba(0,229,255,0.6)]">
+          <div className="font-black italic tracking-tighter text-lg sm:text-xl md:text-2xl leading-none flex items-center gap-0.5 drop-shadow-[0_0_15px_rgba(0,229,255,0.7)]">
             <span className="text-white">NAVI</span>
             <span className="bg-gradient-to-r from-[#00E5FF] to-[#2EE6A6] bg-clip-text text-transparent">SYNC</span>
           </div>
-          <span className="text-[9px] font-mono tracking-widest text-slate-400 uppercase hidden lg:inline">
+          <span className="text-[9px] sm:text-[10px] font-mono tracking-[0.2em] text-slate-400 uppercase font-semibold mt-0.5">
             ISRO SIH 2026 · PS 26168
           </span>
         </div>
