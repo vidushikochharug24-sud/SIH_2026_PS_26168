@@ -111,7 +111,7 @@ export const LandingPage: React.FC = () => {
             onClick={handleStartZoomTransition}
             className="fixed inset-0 z-50 bg-[#04060c] flex flex-col justify-center items-center px-4 select-none cursor-none overflow-hidden"
           >
-            {/* Centered Full-Screen Video 5 Layer (Always Visible & Crisp) */}
+            {/* Centered Full-Screen Video 5 Layer (Preserved at opacity-75) */}
             <video
               ref={video5Ref}
               autoPlay
@@ -126,35 +126,35 @@ export const LandingPage: React.FC = () => {
               <source src="/video5.mp4" type="video/mp4" />
             </video>
 
-            {/* Base Background Infinite Image Carousel Strip (Always Visible - Not Black) */}
-            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 opacity-75 pointer-events-none overflow-hidden flex z-0 py-4">
+            {/* Base Background Infinite Image Carousel Strip (Subtle Dim Base Transparency) */}
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 opacity-25 pointer-events-none overflow-hidden flex z-0 py-4">
               <motion.div
                 animate={{ x: ['0%', '-50%'] }}
                 transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
                 className="flex gap-6 min-w-max px-4"
               >
                 {['/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg'].map((imgSrc, i) => (
-                  <div key={i} className="w-72 h-44 sm:w-96 sm:h-56 md:w-[420px] md:h-64 rounded-3xl overflow-hidden border border-white/30 shadow-[0_0_30px_rgba(0,229,255,0.25)] bg-black/40 flex-shrink-0">
-                    <img src={imgSrc} alt={`Carousel ${i}`} className="w-full h-full object-cover opacity-90 transition-transform duration-500" />
+                  <div key={i} className="w-72 h-44 sm:w-96 sm:h-56 md:w-[420px] md:h-64 rounded-3xl overflow-hidden border border-white/20 shadow-[0_0_20px_rgba(0,229,255,0.1)] bg-black/60 flex-shrink-0">
+                    <img src={imgSrc} alt={`Carousel ${i}`} className="w-full h-full object-cover opacity-50 transition-transform duration-500" />
                   </div>
                 ))}
               </motion.div>
             </div>
 
-            {/* Interactive Cyan Spotlight Beam (Follows cursor, adds vivid glow without blackening outer background) */}
+            {/* Interactive Cyan Spotlight Beam (Follows cursor, adds vivid glow on hover) */}
             <div
               className="absolute inset-0 pointer-events-none z-1"
               style={{
-                background: `radial-gradient(360px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0, 229, 255, 0.22) 0%, rgba(46, 230, 166, 0.08) 45%, transparent 80%)`,
+                background: `radial-gradient(320px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0, 229, 255, 0.25) 0%, rgba(46, 230, 166, 0.08) 45%, transparent 75%)`,
               }}
             />
 
-            {/* High-Contrast Spotlight Carousel Overlay (Amplifies brightness under cursor spotlight lens) */}
+            {/* High-Contrast Spotlight Carousel Overlay (Reveals pictures with 100% full clarity when hovering cursor over them) */}
             <div
               className="absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none overflow-hidden flex z-2 py-4"
               style={{
-                WebkitMaskImage: `radial-gradient(320px circle at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
-                maskImage: `radial-gradient(320px circle at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
+                WebkitMaskImage: `radial-gradient(280px circle at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
+                maskImage: `radial-gradient(280px circle at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
               }}
             >
               <motion.div
