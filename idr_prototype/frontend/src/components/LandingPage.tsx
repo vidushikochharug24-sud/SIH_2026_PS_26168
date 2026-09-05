@@ -92,6 +92,12 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-[#04060c] text-[#E8E6F5] overflow-x-hidden font-sans select-none">
       
+      {/* ── PERSISTENT TOP NAVIGATION BAR ── */}
+      <PersistentNavHeader
+        currentSection={activeSection}
+        onNavigateCockpit={() => setStoreView('predictor')}
+      />
+
       {/* ── BACKGROUND 3D STREETVIEW CANVAS ── */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <CyberHighwayCanvas
@@ -246,12 +252,6 @@ export const LandingPage: React.FC = () => {
 
       {/* ── REVEALED STREETVIEW & 11 STORY SECTIONS ─────────────────────────── */}
       <div className={introFinished ? 'opacity-100 transition-opacity duration-700' : 'opacity-0'}>
-        {/* Persistent Navigation Header */}
-        <PersistentNavHeader
-          currentSection={activeSection}
-          onNavigateCockpit={() => setStoreView('predictor')}
-        />
-
         {/* ── SECTION 1: HERO ENTRY (Cyan-to-Emerald Gradient Title) ───── */}
         <section id="hero" className="relative z-10 min-h-screen flex flex-col justify-center items-center px-4 text-center max-w-4xl mx-auto pt-24">
           
