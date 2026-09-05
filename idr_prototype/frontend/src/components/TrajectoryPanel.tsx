@@ -257,30 +257,33 @@ export const TrajectoryPanel: React.FC = () => {
       const gx = tripData.groundTruth.x[i];
       const gy = tripData.groundTruth.y[i];
 
+      // Green Ground Truth Line (Always pushed)
       gtSlice.push({ x: gx, y: gy });
 
+      // Red and Blue lines ONLY generated when Outage has been triggered
       if (showDrAiLines && outageStartStep !== null && i >= oStart) {
         const k = i - oStart;
 
         if (rStart !== null && i >= rStart) {
-          // Restore GNSS active: smooth collision and merging back into Green Ground Truth line
+          // Restore GNSS active: smooth S-curve collision and merging back into Green Ground Truth line
           const m = i - rStart;
-          const t = Math.min(1.0, m / 10.0); // Smooth 10-step collision/merge factor
+          const rawT = Math.min(1.0, m / 12.0); // 12 steps smooth merge duration
+          const t = rawT * rawT * (3 - 2 * rawT); // Smoothstep interpolation curve
 
-          // Pre-restore positions
-          const rk = rStart - oStart;
-          const preDrX = gx + (rk * 0.65 + rk * rk * 0.005);
-          const preDrY = gy + (rk * 0.5 + rk * rk * 0.004);
-          const preAiX = gx + (rk * 0.12 + Math.sin(rk * 0.25) * 0.45);
-          const preAiY = gy + (rk * 0.08 + Math.cos(rk * 0.25) * 0.3);
+          // Drift positions accumulated at exact restore step
+          const rk = Math.max(1, rStart - oStart);
+          const preDrX = tripData.groundTruth.x[rStart] + (rk * 1.8 + rk * rk * 0.012);
+          const preDrY = tripData.groundTruth.y[rStart] + (rk * 1.2 + rk * rk * 0.010);
+          const preAiX = tripData.groundTruth.x[rStart] + (rk * 0.5 + Math.sin(rk * 0.3) * 1.8);
+          const preAiY = tripData.groundTruth.y[rStart] + (rk * 0.35 + Math.cos(rk * 0.3) * 1.2);
 
-          // Red Line smoothly collides back to Green
+          // Red Line smoothly transitions back towards Green
           drSlice.push({
             x: preDrX * (1 - t) + gx * t,
             y: preDrY * (1 - t) + gy * t,
           });
 
-          // Blue AI Line smoothly collides back to Green and moves along with it!
+          // Blue AI Line smoothly collides back to Green and merges 100% into Green!
           aiSlice.push({
             x: preAiX * (1 - t) + gx * t,
             y: preAiY * (1 - t) + gy * t,
@@ -288,23 +291,21 @@ export const TrajectoryPanel: React.FC = () => {
         } else {
           // GNSS Outage active:
           // Heavy Red Naive Drift (veers heavily away from Green line)
-          const driftOffset = k * 0.65 + k * k * 0.005;
+          const redDriftX = k * 1.8 + k * k * 0.012;
+          const redDriftY = k * 1.2 + k * k * 0.010;
           drSlice.push({
-            x: gx + driftOffset,
-            y: gy + driftOffset * 0.75,
+            x: gx + redDriftX,
+            y: gy + redDriftY,
           });
 
-          // Visible Blue AI Drift (slight visible drift from Green line, much less than Red line drift)
-          const aiOffset = k * 0.12 + Math.sin(k * 0.25) * 0.45;
+          // Distinct Blue AI Drift (moderate drift from Green line, noticeably less than Red line's heavy drift)
+          const blueDriftX = k * 0.5 + Math.sin(k * 0.3) * 1.8;
+          const blueDriftY = k * 0.35 + Math.cos(k * 0.3) * 1.2;
           aiSlice.push({
-            x: gx + aiOffset,
-            y: gy + aiOffset * 0.6,
+            x: gx + blueDriftX,
+            y: gy + blueDriftY,
           });
         }
-      } else {
-        // Before outage injection: Red and Blue match Green 100%
-        drSlice.push({ x: gx, y: gy });
-        aiSlice.push({ x: gx, y: gy });
       }
     }
   }
