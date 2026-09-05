@@ -89,47 +89,32 @@ export const LandingPage: React.FC = () => {
               preload="auto"
               onCanPlay={(e) => e.currentTarget.play().catch(() => {})}
               onWaiting={(e) => e.currentTarget.play().catch(() => {})}
-              className="absolute inset-0 w-full h-full object-cover object-center opacity-15 scale-105 pointer-events-none"
+              className="absolute inset-0 w-full h-full object-cover object-center opacity-25 scale-105 pointer-events-none"
             >
               <source src="/video5.mp4" type="video/mp4" />
             </video>
 
-            {/* 100% VISIBILITY DUAL-ROW INFINITE IMAGE CAROUSEL BACKGROUND */}
-            <div className="absolute inset-0 z-0 pointer-events-none flex flex-col justify-center gap-6 overflow-hidden py-4 opacity-100">
-              
-              {/* Top Row Carousel - Moving Left */}
+            {/* Background Infinite Image Carousel Strip with Balanced Transparency */}
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 opacity-65 pointer-events-none overflow-hidden flex z-0 py-4">
               <motion.div
                 animate={{ x: ['0%', '-50%'] }}
-                transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
+                transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
                 className="flex gap-6 min-w-max px-4"
               >
                 {['/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg'].map((imgSrc, i) => (
-                  <div key={`top-${i}`} className="w-80 h-48 sm:w-[420px] sm:h-64 md:w-[480px] md:h-72 rounded-3xl overflow-hidden border-2 border-[#00E5FF]/40 shadow-[0_0_50px_rgba(0,229,255,0.4)] bg-black flex-shrink-0">
-                    <img src={imgSrc} alt={`Carousel top ${i}`} className="w-full h-full object-cover opacity-100" />
+                  <div key={i} className="w-72 h-44 sm:w-96 sm:h-56 md:w-[420px] md:h-64 rounded-3xl overflow-hidden border border-white/25 shadow-[0_0_35px_rgba(0,229,255,0.25)] bg-black/50 flex-shrink-0">
+                    <img src={imgSrc} alt={`Carousel ${i}`} className="w-full h-full object-cover opacity-80 transition-transform duration-500" />
                   </div>
                 ))}
               </motion.div>
-
-              {/* Bottom Row Carousel - Moving Right */}
-              <motion.div
-                animate={{ x: ['-50%', '0%'] }}
-                transition={{ duration: 26, repeat: Infinity, ease: 'linear' }}
-                className="flex gap-6 min-w-max px-4"
-              >
-                {['/pic4.jpg', '/pic3.jpg', '/pic2.jpg', '/pic1.jpg', '/pic4.jpg', '/pic3.jpg', '/pic2.jpg', '/pic1.jpg', '/pic4.jpg', '/pic3.jpg', '/pic2.jpg', '/pic1.jpg'].map((imgSrc, i) => (
-                  <div key={`bot-${i}`} className="w-80 h-48 sm:w-[420px] sm:h-64 md:w-[480px] md:h-72 rounded-3xl overflow-hidden border-2 border-[#2EE6A6]/40 shadow-[0_0_50px_rgba(46,230,166,0.4)] bg-black flex-shrink-0">
-                    <img src={imgSrc} alt={`Carousel bot ${i}`} className="w-full h-full object-cover opacity-100" />
-                  </div>
-                ))}
-              </motion.div>
-
             </div>
 
-            {/* Ultra-Light Transparent Gradient Overlay (Does not hide images) */}
-            <div className="absolute inset-0 bg-gradient-to-b from-[#04060c]/60 via-transparent to-[#04060c]/70 pointer-events-none z-5" />
+            {/* Lightweight Ambient Vignette Overlay */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(4,6,12,0.15)_0%,rgba(4,6,12,0.85)_100%)] pointer-events-none z-5" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#04060c] via-transparent to-[#04060c]/60 pointer-events-none z-5" />
 
-            {/* Central Pure Crystal Glass Box Container */}
-            <div className="relative z-10 bg-[#04060c]/25 backdrop-blur-sm border-2 border-[#00E5FF]/40 rounded-3xl p-6 sm:p-8 md:p-10 shadow-[0_0_100px_rgba(0,229,255,0.4)] flex flex-col items-center justify-center max-w-2xl text-center mx-4 my-auto">
+            {/* Central Spaced Ultra-Transparent Glass Container Box */}
+            <div className="relative z-10 bg-[#060913]/35 backdrop-blur-md border border-white/25 rounded-3xl p-6 sm:p-8 md:p-10 shadow-[0_0_90px_rgba(0,229,255,0.3)] flex flex-col items-center justify-center max-w-2xl text-center mx-4 my-auto">
               
               {/* NAVISYNC Pure CSS Text Logotype */}
               <motion.div
@@ -137,15 +122,15 @@ export const LandingPage: React.FC = () => {
                 animate={{ y: 0, opacity: 1 }}
                 whileHover={{ scale: 1.03, y: -2 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
-                className="mb-4 text-center pointer-events-auto relative inline-block cursor-pointer select-none"
+                className="mb-5 text-center pointer-events-auto relative inline-block cursor-pointer select-none"
               >
-                <div className="relative inline-flex items-center justify-center font-black italic tracking-tighter text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-none drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)] px-3 py-1 overflow-visible">
+                <div className="relative inline-flex items-center justify-center font-black italic tracking-tighter text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-none drop-shadow-[0_0_35px_rgba(0,229,255,0.8)] px-3 py-1 overflow-visible">
                   
                   {/* NAVI in Pure Bold White */}
-                  <span className="text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">NAVI</span>
+                  <span className="text-white">NAVI</span>
 
                   {/* SYNC in Cyan-to-Emerald Gradient */}
-                  <span className="bg-gradient-to-r from-[#00E5FF] via-[#00E5FF] to-[#2EE6A6] bg-clip-text text-transparent pr-2 drop-shadow-[0_0_25px_rgba(0,229,255,0.9)]">
+                  <span className="bg-gradient-to-r from-[#00E5FF] via-[#00E5FF] to-[#2EE6A6] bg-clip-text text-transparent pr-2">
                     SYNC
                   </span>
 
