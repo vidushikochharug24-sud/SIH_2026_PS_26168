@@ -240,44 +240,6 @@ export const LandingPage: React.FC = () => {
 
             </div>
 
-            {/* ── EXTENDED NEON GPS NAVIGATION ARROW CURSOR & TRAIL ── */}
-            <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-              {/* Glowing Cyan Breadcrumb Particles Trail */}
-              {trail.map((p, idx) => {
-                const ratio = idx / trail.length;
-                const size = 3 + ratio * 7;
-                const opacity = ratio * 0.75;
-                return (
-                  <div
-                    key={p.id}
-                    className="absolute rounded-full bg-[#00E5FF] shadow-[0_0_12px_#00E5FF]"
-                    style={{
-                      left: p.x - size / 2,
-                      top: p.y - size / 2,
-                      width: `${size}px`,
-                      height: `${size}px`,
-                      opacity,
-                    }}
-                  />
-                );
-              })}
-
-              {/* GPS Navigation Arrow Cursor Head */}
-              <div
-                className="absolute transition-transform duration-75 ease-out flex items-center justify-center"
-                style={{
-                  left: mousePos.x - 12,
-                  top: mousePos.y - 12,
-                  transform: `rotate(${cursorAngle}deg)`,
-                }}
-              >
-                <div className="relative flex items-center justify-center">
-                  <Navigation className="w-6 h-6 text-[#00E5FF] fill-[#00E5FF]/50 filter drop-shadow-[0_0_12px_#00E5FF]" />
-                  <div className="absolute w-2 h-2 rounded-full bg-white shadow-[0_0_8px_#fff]" />
-                </div>
-              </div>
-            </div>
-
           </motion.div>
         )}
       </AnimatePresence>

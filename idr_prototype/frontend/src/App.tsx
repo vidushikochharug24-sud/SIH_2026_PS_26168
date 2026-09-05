@@ -6,6 +6,7 @@ import { LandingPage } from './components/LandingPage';
 import { TrajectoryPanel } from './components/TrajectoryPanel';
 import { SensorPanel } from './components/SensorPanel';
 import { CyberHighwayCanvas } from './components/CyberHighwayCanvas';
+import { GpsCursorTrail } from './components/GpsCursorTrail';
 
 export const App: React.FC = () => {
   const currentView = useReplayStore((s) => s.currentView);
@@ -14,6 +15,9 @@ export const App: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-[#04060c] text-[#E8E6F5] overflow-x-hidden">
       
+      {/* ── GLOBAL GPS NAVIGATION ARROW & BREADCRUMB TRAIL ────── */}
+      <GpsCursorTrail />
+
       {/* ── BACKGROUND 3D STREETVIEW CANVAS (Visible in background) ────── */}
       <div className="fixed inset-0 pointer-events-none z-0 opacity-40">
         <CyberHighwayCanvas scrollProgress={0.5} />
