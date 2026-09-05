@@ -33,6 +33,12 @@ export const LandingPage: React.FC = () => {
   };
 
   useEffect(() => {
+    if (video5Ref.current) {
+      video5Ref.current.play().catch(e => console.warn('Video play error:', e));
+    }
+  }, []);
+
+  useEffect(() => {
     const handleScroll = () => {
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
       const currentScroll = window.scrollY;
@@ -80,7 +86,10 @@ export const LandingPage: React.FC = () => {
               loop
               muted
               playsInline
-              className="absolute inset-0 w-full h-full object-cover object-center opacity-50 scale-105"
+              preload="auto"
+              onCanPlay={(e) => e.currentTarget.play().catch(() => {})}
+              onWaiting={(e) => e.currentTarget.play().catch(() => {})}
+              className="absolute inset-0 w-full h-full object-cover object-center opacity-50 scale-105 pointer-events-none"
             >
               <source src="/video5.mp4" type="video/mp4" />
             </video>
