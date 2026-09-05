@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Globe, Zap, ArrowDown, Target } from 'lucide-react';
+import { ArrowRight, Globe, Zap, ArrowDown, Target, Navigation } from 'lucide-react';
 import { useReplayStore } from '../state/replayStore';
 import { CyberHighwayCanvas } from './CyberHighwayCanvas';
 import { PersistentNavHeader } from './PersistentNavHeader';
@@ -23,6 +23,12 @@ export const LandingPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState('hero');
   const video5Ref = useRef<HTMLVideoElement | null>(null);
 
+  // Mouse Tracking State for GPS Cursor Trail & Radial Spotlight Reveal
+  const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: -1000, y: -1000 });
+  const [trail, setTrail] = useState<Array<{ x: number; y: number; id: number }>>([]);
+  const [cursorAngle, setCursorAngle] = useState(0);
+  const prevMouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
   const handleStartZoomTransition = () => {
     if (isZooming || introFinished) return;
     setIsZooming(true);
@@ -36,6 +42,32 @@ export const LandingPage: React.FC = () => {
     if (video5Ref.current) {
       video5Ref.current.play().catch(e => console.warn('Video play error:', e));
     }
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = e.clientX;
+      const y = e.clientY;
+      setMousePos({ x, y });
+
+      // Calculate GPS Navigation arrow heading angle based on movement delta
+      const dx = x - prevMouseRef.current.x;
+      const dy = y - prevMouseRef.current.y;
+      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+        const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI + 90;
+        setCursorAngle(angleDeg);
+      }
+      prevMouseRef.current = { x, y };
+
+      // Append trailing particles
+      setTrail((prev) => [
+        ...prev.slice(-12),
+        { x, y, id: Date.now() + Math.random() },
+      ]);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   useEffect(() => {
@@ -77,7 +109,7 @@ export const LandingPage: React.FC = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
             onClick={handleStartZoomTransition}
-            className="fixed inset-0 z-50 bg-[#04060c] flex flex-col justify-center items-center px-4 select-none cursor-pointer overflow-hidden"
+            className="fixed inset-0 z-50 bg-[#04060c] flex flex-col justify-center items-center px-4 select-none cursor-none overflow-hidden"
           >
             {/* Centered Full-Screen Video 5 Layer with Enhanced Visibility */}
             <video
@@ -94,16 +126,45 @@ export const LandingPage: React.FC = () => {
               <source src="/video5.mp4" type="video/mp4" />
             </video>
 
-            {/* Background Infinite Image Carousel Strip with Balanced Transparency */}
-            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 opacity-65 pointer-events-none overflow-hidden flex z-0 py-4">
+            {/* Background Infinite Image Carousel Strip */}
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 opacity-35 pointer-events-none overflow-hidden flex z-0 py-4">
               <motion.div
                 animate={{ x: ['0%', '-50%'] }}
                 transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
                 className="flex gap-6 min-w-max px-4"
               >
                 {['/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg'].map((imgSrc, i) => (
-                  <div key={i} className="w-72 h-44 sm:w-96 sm:h-56 md:w-[420px] md:h-64 rounded-3xl overflow-hidden border border-white/25 shadow-[0_0_35px_rgba(0,229,255,0.25)] bg-black/50 flex-shrink-0">
-                    <img src={imgSrc} alt={`Carousel ${i}`} className="w-full h-full object-cover opacity-80 transition-transform duration-500" />
+                  <div key={i} className="w-72 h-44 sm:w-96 sm:h-56 md:w-[420px] md:h-64 rounded-3xl overflow-hidden border border-white/20 shadow-[0_0_25px_rgba(0,229,255,0.15)] bg-black/50 flex-shrink-0">
+                    <img src={imgSrc} alt={`Carousel ${i}`} className="w-full h-full object-cover opacity-70 transition-transform duration-500" />
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+
+            {/* Interactive Spotlight Radial Reveal Layer (Curtains up opacity under cursor) */}
+            <div
+              className="absolute inset-0 pointer-events-none z-1"
+              style={{
+                background: `radial-gradient(280px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0, 229, 255, 0.15) 0%, rgba(4, 6, 12, 0.45) 50%, rgba(4, 6, 12, 0.85) 100%)`,
+              }}
+            />
+
+            {/* Secondary High-Brightness Carousel Layer Revealed Exclusively Under Cursor Spotlight */}
+            <div
+              className="absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none overflow-hidden flex z-2 py-4"
+              style={{
+                WebkitMaskImage: `radial-gradient(220px circle at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
+                maskImage: `radial-gradient(220px circle at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
+              }}
+            >
+              <motion.div
+                animate={{ x: ['0%', '-50%'] }}
+                transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
+                className="flex gap-6 min-w-max px-4"
+              >
+                {['/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg'].map((imgSrc, i) => (
+                  <div key={i} className="w-72 h-44 sm:w-96 sm:h-56 md:w-[420px] md:h-64 rounded-3xl overflow-hidden border-2 border-[#00E5FF] shadow-[0_0_50px_rgba(0,229,255,0.8)] bg-black flex-shrink-0">
+                    <img src={imgSrc} alt={`Spotlight Carousel ${i}`} className="w-full h-full object-cover opacity-100 scale-105" />
                   </div>
                 ))}
               </motion.div>
@@ -114,23 +175,23 @@ export const LandingPage: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-[#04060c] via-transparent to-[#04060c]/60 pointer-events-none z-5" />
 
             {/* Central Spaced Ultra-Transparent Glass Container Box */}
-            <div className="relative z-10 bg-[#060913]/35 backdrop-blur-md border border-white/25 rounded-3xl p-6 sm:p-8 md:p-10 shadow-[0_0_90px_rgba(0,229,255,0.3)] flex flex-col items-center justify-center max-w-2xl text-center mx-4 my-auto">
+            <div className="relative z-10 bg-[#060913]/35 backdrop-blur-md border border-white/25 rounded-3xl p-6 sm:p-8 md:p-10 shadow-[0_0_90px_rgba(0,229,255,0.3)] flex flex-col items-center justify-center max-w-2xl text-center mx-4 my-auto group">
               
               {/* NAVISYNC Pure CSS Text Logotype */}
               <motion.div
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                whileHover={{ scale: 1.03, y: -2 }}
+                whileHover={{ scale: 1.05, y: -2 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
-                className="mb-5 text-center pointer-events-auto relative inline-block cursor-pointer select-none"
+                className="mb-5 text-center pointer-events-auto relative inline-block cursor-none select-none transition-all duration-300 hover:drop-shadow-[0_0_50px_rgba(0,229,255,1)]"
               >
                 <div className="relative inline-flex items-center justify-center font-black italic tracking-tighter text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-none drop-shadow-[0_0_35px_rgba(0,229,255,0.8)] px-3 py-1 overflow-visible">
                   
                   {/* NAVI in Pure Bold White */}
-                  <span className="text-white">NAVI</span>
+                  <span className="text-white hover:text-[#00E5FF] transition-colors duration-300">NAVI</span>
 
                   {/* SYNC in Cyan-to-Emerald Gradient */}
-                  <span className="bg-gradient-to-r from-[#00E5FF] via-[#00E5FF] to-[#2EE6A6] bg-clip-text text-transparent pr-2">
+                  <span className="bg-gradient-to-r from-[#00E5FF] via-[#00E5FF] to-[#2EE6A6] bg-clip-text text-transparent pr-2 hover:brightness-125 transition-all duration-300">
                     SYNC
                   </span>
 
@@ -143,8 +204,8 @@ export const LandingPage: React.FC = () => {
 
                 </div>
 
-                {/* Subtitle Line with Reduced Gap */}
-                <div className="text-[9px] sm:text-[10px] md:text-[11px] font-mono font-bold tracking-[0.35em] text-slate-200 uppercase mt-0.5 drop-shadow-[0_0_12px_rgba(0,229,255,0.5)]">
+                {/* Subtitle Line with Interactive Highlight */}
+                <div className="text-[9px] sm:text-[10px] md:text-[11px] font-mono font-bold tracking-[0.35em] text-slate-200 uppercase mt-0.5 drop-shadow-[0_0_12px_rgba(0,229,255,0.5)] hover:text-[#00E5FF] hover:tracking-[0.4em] transition-all duration-300">
                   INTELLIGENT DEAD RECKONING ENGINE
                 </div>
               </motion.div>
@@ -168,9 +229,9 @@ export const LandingPage: React.FC = () => {
                 </div>
               </motion.div>
 
-              {/* Cyan-to-Emerald Glowing Editorial Serif Heading */}
+              {/* Cyan-to-Emerald Glowing Editorial Serif Heading with Hover Glow */}
               <div className="pointer-events-none space-y-2 mt-2">
-                <h1 className="font-display italic text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal leading-tight bg-gradient-to-r from-white via-[#00E5FF] to-[#2EE6A6] bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(0,229,255,0.6)]">
+                <h1 className="font-display italic text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal leading-tight bg-gradient-to-r from-white via-[#00E5FF] to-[#2EE6A6] bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(0,229,255,0.6)] group-hover:drop-shadow-[0_0_45px_rgba(0,229,255,0.9)] transition-all duration-300">
                   Continuous vehicle navigation when GNSS disappears.
                 </h1>
                 <span className="font-mono text-[10px] sm:text-[11px] text-[#00E5FF] tracking-widest uppercase block animate-pulse">
@@ -178,6 +239,43 @@ export const LandingPage: React.FC = () => {
                 </span>
               </div>
 
+            </div>
+
+            {/* ── NEON GPS NAVIGATION ARROW CURSOR & SUBTLE TRAIL ── */}
+            <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+              {/* Subtle Cyan Particles Trail */}
+              {trail.map((p, idx) => {
+                const size = 3 + (idx / trail.length) * 5;
+                const opacity = (idx / trail.length) * 0.45;
+                return (
+                  <div
+                    key={p.id}
+                    className="absolute rounded-full bg-[#00E5FF] shadow-[0_0_10px_#00E5FF]"
+                    style={{
+                      left: p.x - size / 2,
+                      top: p.y - size / 2,
+                      width: `${size}px`,
+                      height: `${size}px`,
+                      opacity,
+                    }}
+                  />
+                );
+              })}
+
+              {/* GPS Navigation Arrow Cursor Head */}
+              <div
+                className="absolute transition-transform duration-75 ease-out flex items-center justify-center"
+                style={{
+                  left: mousePos.x - 12,
+                  top: mousePos.y - 12,
+                  transform: `rotate(${cursorAngle}deg)`,
+                }}
+              >
+                <div className="relative flex items-center justify-center">
+                  <Navigation className="w-6 h-6 text-[#00E5FF] fill-[#00E5FF]/40 filter drop-shadow-[0_0_8px_#00E5FF]" />
+                  <div className="absolute w-2 h-2 rounded-full bg-white shadow-[0_0_6px_#fff]" />
+                </div>
+              </div>
             </div>
 
           </motion.div>
