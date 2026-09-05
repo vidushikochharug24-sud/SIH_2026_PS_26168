@@ -89,25 +89,40 @@ export const LandingPage: React.FC = () => {
               preload="auto"
               onCanPlay={(e) => e.currentTarget.play().catch(() => {})}
               onWaiting={(e) => e.currentTarget.play().catch(() => {})}
-              className="absolute inset-0 w-full h-full object-cover object-center opacity-50 scale-105 pointer-events-none"
+              className="absolute inset-0 w-full h-full object-cover object-center opacity-30 scale-105 pointer-events-none"
             >
               <source src="/video5.mp4" type="video/mp4" />
             </video>
 
-            {/* Ambient Gradient Overlay */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(4,6,12,0.3)_0%,rgba(4,6,12,0.92)_100%)] pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#04060c] via-transparent to-[#04060c]/80 pointer-events-none" />
+            {/* Background Infinite Image Carousel Strip */}
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 opacity-35 pointer-events-none overflow-hidden flex z-0 py-6">
+              <motion.div
+                animate={{ x: ['0%', '-50%'] }}
+                transition={{ duration: 28, repeat: Infinity, ease: 'linear' }}
+                className="flex gap-6 min-w-max px-4"
+              >
+                {['/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg'].map((imgSrc, i) => (
+                  <div key={i} className="w-64 h-40 sm:w-80 sm:h-48 md:w-96 md:h-56 rounded-2xl overflow-hidden border border-white/20 shadow-[0_0_30px_rgba(0,229,255,0.2)] bg-black/40 flex-shrink-0">
+                    <img src={imgSrc} alt={`Carousel ${i}`} className="w-full h-full object-cover opacity-85" />
+                  </div>
+                ))}
+              </motion.div>
+            </div>
 
-            {/* Central Spaced Layout */}
-            <div className="relative z-10 flex flex-col items-center justify-center max-w-3xl text-center px-4">
+            {/* Ambient Gradient Overlay */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(4,6,12,0.45)_0%,rgba(4,6,12,0.95)_100%)] pointer-events-none z-5" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#04060c] via-transparent to-[#04060c]/80 pointer-events-none z-5" />
+
+            {/* Central Spaced Layout inside Glass-type box */}
+            <div className="relative z-10 bg-[#0b0f19]/85 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 sm:p-10 md:p-12 shadow-[0_0_80px_rgba(0,229,255,0.25)] flex flex-col items-center justify-center max-w-3xl text-center mx-4 my-auto">
               
-              {/* NAVISYNC Pure CSS Text Logotype (Matching text from media_1788535935987.png) */}
+              {/* NAVISYNC Pure CSS Text Logotype */}
               <motion.div
                 initial={{ y: -30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 whileHover={{ scale: 1.03, y: -2 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
-                className="mb-8 text-center pointer-events-auto relative inline-block cursor-pointer select-none"
+                className="mb-6 text-center pointer-events-auto relative inline-block cursor-pointer select-none"
               >
                 <div className="relative inline-flex items-center justify-center font-black italic tracking-tighter text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-none drop-shadow-[0_0_40px_rgba(0,229,255,0.7)] px-4 py-1 overflow-visible">
                   
@@ -138,27 +153,27 @@ export const LandingPage: React.FC = () => {
               <motion.div
                 animate={isZooming ? { scale: 24, opacity: 0 } : { scale: [0.97, 1.03, 0.97] }}
                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                className="flex flex-col items-center justify-center mb-6 pointer-events-none"
+                className="flex flex-col items-center justify-center mb-5 pointer-events-none"
               >
-                <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full border border-[#00E5FF]/40 flex items-center justify-center shadow-[0_0_30px_rgba(0,229,255,0.3)]">
+                <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full border border-[#00E5FF]/40 flex items-center justify-center shadow-[0_0_30px_rgba(0,229,255,0.3)]">
                   <div className="absolute inset-0 rounded-full border border-dashed border-[#2EE6A6]/60 animate-spin" style={{ animationDuration: '18s' }} />
-                  <div className="w-9 h-9 rounded-full bg-[#00E5FF]/15 border border-[#00E5FF]/50 flex items-center justify-center backdrop-blur-sm">
-                    <Target className="w-5 h-5 text-[#00E5FF] animate-pulse" />
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#00E5FF]/15 border border-[#00E5FF]/50 flex items-center justify-center backdrop-blur-sm">
+                    <Target className="w-4 h-4 sm:w-5 sm:h-5 text-[#00E5FF] animate-pulse" />
                   </div>
                 </div>
 
-                <div className="mt-3 bg-[#0c0f19]/80 backdrop-blur-md px-3.5 py-1 rounded-full border border-[#00E5FF]/40 text-[#00E5FF] text-[11px] font-mono font-medium flex items-center gap-2 shadow-lg">
+                <div className="mt-2.5 bg-[#0c0f19]/80 backdrop-blur-md px-3 py-1 rounded-full border border-[#00E5FF]/40 text-[#00E5FF] text-[10px] sm:text-[11px] font-mono font-medium flex items-center gap-2 shadow-lg">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34D399] animate-pulse" />
                   <span>Satellite Signal Acquired</span>
                 </div>
               </motion.div>
 
-              {/* Cyan-to-Emerald Glowing Editorial Serif Heading (Positioned further down as requested) */}
-              <div className="pointer-events-none space-y-4 mt-8 md:mt-12 pt-2">
-                <h1 className="font-display italic text-3xl md:text-5xl font-normal leading-tight bg-gradient-to-r from-white via-[#00E5FF] to-[#2EE6A6] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(0,229,255,0.5)]">
+              {/* Cyan-to-Emerald Glowing Editorial Serif Heading */}
+              <div className="pointer-events-none space-y-3 mt-4">
+                <h1 className="font-display italic text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal leading-tight bg-gradient-to-r from-white via-[#00E5FF] to-[#2EE6A6] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(0,229,255,0.5)]">
                   Continuous vehicle navigation when GNSS disappears.
                 </h1>
-                <span className="font-mono text-xs text-[#00E5FF] tracking-widest uppercase block animate-pulse">
+                <span className="font-mono text-[11px] sm:text-xs text-[#00E5FF] tracking-widest uppercase block animate-pulse">
                   Click anywhere or scroll to descend into street view
                 </span>
               </div>
