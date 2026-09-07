@@ -20,8 +20,8 @@ export const Pipeline3DBackground: React.FC = () => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    // 1. 3D Particle Cloud / Spatial Constellation Grid
-    const particleCount = 450;
+    // 1. 3D Particle Cloud / Spatial Constellation Grid (Spans full page scroll depth)
+    const particleCount = 1200;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
@@ -31,9 +31,9 @@ export const Pipeline3DBackground: React.FC = () => {
     const colorBlue = new THREE.Color(0x168CFF);
 
     for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 35;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 45;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 20 - 5;
+      positions[i * 3] = (Math.random() - 0.5) * 45;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 180; // Vertically spans all sections to bottom
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 25 - 5;
 
       const mixColor = i % 3 === 0 ? colorCyan : i % 3 === 1 ? colorTeal : colorBlue;
       colors[i * 3] = mixColor.r;

@@ -5,6 +5,7 @@ import { useReplayStore } from '../state/replayStore';
 import { HeroNavbar } from './HeroNavbar';
 import { InteractiveEarthCanvas } from './InteractiveEarthCanvas';
 import { CyberHighwayCanvas } from './CyberHighwayCanvas';
+import { Pipeline3DBackground } from './Pipeline3DBackground';
 import { BlackoutTransition } from './BlackoutTransition';
 import { EnginePipelineSection } from './EnginePipelineSection';
 import { PhoneAlignmentSection } from './PhoneAlignmentSection';
@@ -525,52 +526,76 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* ── STORY SECTIONS (PIPELINE, DRIFT, MAP MATCHING, BENCHMARKS) ── */}
-        <div id="pipeline" className="relative z-10">
-          <EnginePipelineSection />
-        </div>
+        {/* ── CONTINUOUS 3D BACKGROUND & NEON GRID SPANNING ALL SECTIONS TILL BOTTOM ── */}
+        <div className="relative w-full overflow-hidden bg-[#020B18]">
+          
+          {/* Continuous Three.js 3D Particle Constellation Background Canvas */}
+          <Pipeline3DBackground />
 
-        <div className="relative z-10">
-          <PhoneAlignmentSection />
-        </div>
+          {/* Ambient Radial Spotlights & Cyber Blueprint Grid */}
+          <div className="absolute inset-0 pointer-events-none z-0">
+            <div 
+              className="absolute inset-0 opacity-20"
+              style={{
+                backgroundImage: `radial-gradient(#00D9FF 1px, transparent 1px), linear-gradient(to right, rgba(0, 217, 255, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 217, 255, 0.04) 1px, transparent 1px)`,
+                backgroundSize: `24px 24px, 48px 48px, 48px 48px`
+              }}
+            />
+            {/* Soft Ambient Neon Glow Orbs down the page */}
+            <div className="absolute top-[10%] left-1/4 w-[600px] h-[600px] bg-[#00D9FF]/10 blur-[150px] rounded-full" />
+            <div className="absolute top-[35%] right-10 w-[550px] h-[550px] bg-[#00E6B8]/10 blur-[150px] rounded-full" />
+            <div className="absolute top-[60%] left-10 w-[600px] h-[600px] bg-[#168CFF]/10 blur-[150px] rounded-full" />
+            <div className="absolute top-[85%] right-1/4 w-[500px] h-[500px] bg-[#7657FF]/10 blur-[150px] rounded-full" />
+          </div>
 
-        <div className="relative z-10">
-          <SignalFilterSection />
-        </div>
+          {/* STORY SECTIONS */}
+          <div id="pipeline" className="relative z-10">
+            <EnginePipelineSection />
+          </div>
 
-        <div id="dr" className="relative z-10">
-          <DriftComparisonSection />
-        </div>
+          <div className="relative z-10">
+            <PhoneAlignmentSection />
+          </div>
 
-        <div id="map-matching" className="relative z-10">
-          <MapMatchingSection />
-        </div>
+          <div className="relative z-10">
+            <SignalFilterSection />
+          </div>
 
-        <div className="relative z-10">
-          <GnssReturnSection />
-        </div>
+          <div id="dr" className="relative z-10">
+            <DriftComparisonSection />
+          </div>
 
-        <div id="benchmarks" className="relative z-10">
-          <ResultsBenchmarkSection />
-        </div>
+          <div id="map-matching" className="relative z-10">
+            <MapMatchingSection />
+          </div>
 
-        <div id="about" className="relative z-10">
-          <EdgeArchitectureSection />
-        </div>
+          <div className="relative z-10">
+            <GnssReturnSection />
+          </div>
 
-        {/* Footer */}
-        <footer className="relative z-10 py-16 text-center border-t border-white/10 bg-[#020B18]">
-          <h3 className="font-display italic text-2xl text-white mb-2 drop-shadow-[0_0_20px_rgba(0,217,255,0.3)]">Experience NaviSync Engine</h3>
-          <p className="text-xs text-[#B7C7D9] max-w-md mx-auto mb-6">
-            ISRO Smart India Hackathon 2026 — Problem Statement 26168.
-          </p>
-          <button
-            onClick={() => setStoreView('predictor')}
-            className="py-3 px-6 rounded-full font-bold text-xs text-black bg-gradient-to-r from-[#00D9FF] to-[#00E6B8] hover:scale-105 transition-transform cursor-pointer"
-          >
-            Enter Navigation Engine
-          </button>
-        </footer>
+          <div id="benchmarks" className="relative z-10">
+            <ResultsBenchmarkSection />
+          </div>
+
+          <div id="about" className="relative z-10">
+            <EdgeArchitectureSection />
+          </div>
+
+          {/* Footer */}
+          <footer className="relative z-10 py-16 text-center border-t border-white/10 bg-[#020B18]/90 backdrop-blur-md">
+            <h3 className="font-display italic text-2xl text-white mb-2 drop-shadow-[0_0_20px_rgba(0,217,255,0.3)]">Experience NaviSync Engine</h3>
+            <p className="text-xs text-[#B7C7D9] max-w-md mx-auto mb-6">
+              ISRO Smart India Hackathon 2026 — Problem Statement 26168.
+            </p>
+            <button
+              onClick={() => setStoreView('predictor')}
+              className="py-3 px-6 rounded-full font-bold text-xs text-black bg-gradient-to-r from-[#00D9FF] to-[#00E6B8] hover:scale-105 transition-transform cursor-pointer"
+            >
+              Enter Navigation Engine
+            </button>
+          </footer>
+
+        </div>
 
       </div>
 
