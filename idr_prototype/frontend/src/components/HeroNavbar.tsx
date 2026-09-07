@@ -19,6 +19,7 @@ export const HeroNavbar: React.FC<HeroNavbarProps> = ({
     <motion.header
       initial={{ y: -25, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -25, opacity: 0 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
       className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-[#020B18]/85 border-b border-white/10 px-4 md:px-10 py-3 flex items-center justify-between font-sans shadow-[0_4px_30px_rgba(2,11,24,0.8)]"
     >

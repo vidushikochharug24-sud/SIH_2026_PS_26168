@@ -135,11 +135,15 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-[#020B18] text-[#FFFFFF] overflow-x-hidden font-sans select-none">
       
-      {/* ── TOP NAV BAR ── */}
-      <HeroNavbar
-        onNavigateCockpit={() => setStoreView('predictor')}
-        onScrollToSection={scrollToSection}
-      />
+      {/* ── TOP NAV BAR (Fades in after clicking Initialize 3D Globe) ── */}
+      <AnimatePresence>
+        {(landingState === 'EARTH_ACTIVE' || landingState === 'STREET_TRANSITION' || landingState === 'STREET_VIEW') && (
+          <HeroNavbar
+            onNavigateCockpit={() => setStoreView('predictor')}
+            onScrollToSection={scrollToSection}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── 1. HERO SECTION CONTAINER (PHONE → ROUTE → LIVE 3D EARTH) ── */}
       <section id="hero" className="relative w-full h-screen min-h-[720px] flex flex-col justify-between pt-20 overflow-hidden bg-[#020B18]">
