@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Globe, Zap, ArrowDown, Target, Navigation } from 'lucide-react';
+import { ArrowRight, Zap, ArrowDown, Radio, ShieldCheck, Globe, Cpu, Target, Compass, Sparkles, Navigation } from 'lucide-react';
 import { useReplayStore } from '../state/replayStore';
+import { HeroNavbar } from './HeroNavbar';
+import { InteractiveEarthCanvas } from './InteractiveEarthCanvas';
 import { CyberHighwayCanvas } from './CyberHighwayCanvas';
-import { PersistentNavHeader } from './PersistentNavHeader';
 import { BlackoutTransition } from './BlackoutTransition';
 import { EnginePipelineSection } from './EnginePipelineSection';
 import { PhoneAlignmentSection } from './PhoneAlignmentSection';
@@ -14,68 +15,76 @@ import { GnssReturnSection } from './GnssReturnSection';
 import { ResultsBenchmarkSection } from './ResultsBenchmarkSection';
 import { EdgeArchitectureSection } from './EdgeArchitectureSection';
 
+export type LandingState = 
+  | 'INTRO_VIDEO'       // MP4 /final.mp4 hero sequence playing
+  | 'EARTH_HANDOFF'     // Cross-fading MP4 to live 3D Earth
+  | 'INTERACTIVE_EARTH' // Live Three.js 3D Earth & Satellite active
+  | 'STREET_TRANSITION' // Camera zooming down into Earth surface
+  | 'STREET_VIEW';      // Descended into 3D Street View page experience
+
 export const LandingPage: React.FC = () => {
   const setStoreView = useReplayStore((s) => s.setStoreView);
   
-  const [introFinished, setIntroFinished] = useState(false);
-  const [isZooming, setIsZooming] = useState(false);
+  // Cinematic State Machine
+  const [landingState, setLandingState] = useState<LandingState>('INTRO_VIDEO');
+  const [videoTime, setVideoTime] = useState(0);
+  const [earthHovered, setEarthHovered] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState('hero');
-  const video5Ref = useRef<HTMLVideoElement | null>(null);
+  const finalVideoRef = useRef<HTMLVideoElement | null>(null);
 
-  // Mouse Tracking State for GPS Cursor Trail & Radial Spotlight Reveal
-  const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: -1000, y: -1000 });
-  const [trail, setTrail] = useState<Array<{ x: number; y: number; id: number }>>([]);
-  const [cursorAngle, setCursorAngle] = useState(0);
-  const prevMouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  // Timed HTML Text Sync (over MP4 video)
+  const showBadge = videoTime >= 0.5 || landingState !== 'INTRO_VIDEO';
+  const showHeading = videoTime >= 1.0 || landingState !== 'INTRO_VIDEO';
+  const showSubtitle = videoTime >= 1.5 || landingState !== 'INTRO_VIDEO';
+  const showCTA = videoTime >= 2.0 || landingState !== 'INTRO_VIDEO';
 
-  const handleStartZoomTransition = () => {
-    if (isZooming || introFinished) return;
-    setIsZooming(true);
-    setTimeout(() => {
-      setIntroFinished(true);
-      setIsZooming(false);
-    }, 850);
-  };
-
+  // 1. MP4 Hero Video Auto-Play & Handoff Timer
   useEffect(() => {
-    if (video5Ref.current) {
-      video5Ref.current.play().catch(e => console.warn('Video play error:', e));
-    }
-  }, []);
+    const video = finalVideoRef.current;
+    if (!video) return;
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const x = e.clientX;
-      const y = e.clientY;
-      setMousePos({ x, y });
+    video.currentTime = 0;
+    video.play().catch(err => console.warn('Hero video autoplay fallback:', err));
 
-      // Calculate GPS Navigation arrow heading angle based on movement delta
-      const dx = x - prevMouseRef.current.x;
-      const dy = y - prevMouseRef.current.y;
-      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-        const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI + 90;
-        setCursorAngle(angleDeg);
+    const handleTimeUpdate = () => {
+      setVideoTime(video.currentTime);
+      // Handoff to Live 3D Earth when video nears completion
+      if (video.duration && video.currentTime >= video.duration - 0.4) {
+        if (landingState === 'INTRO_VIDEO') {
+          setLandingState('EARTH_HANDOFF');
+          setTimeout(() => setLandingState('INTERACTIVE_EARTH'), 400);
+        }
       }
-      prevMouseRef.current = { x, y };
-
-      // Append trailing particles (extended trail length)
-      setTrail((prev) => [
-        ...prev.slice(-28),
-        { x, y, id: Date.now() + Math.random() },
-      ]);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+    const handleEnded = () => {
+      if (landingState === 'INTRO_VIDEO') {
+        setLandingState('EARTH_HANDOFF');
+        setTimeout(() => setLandingState('INTERACTIVE_EARTH'), 400);
+      }
+    };
 
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('ended', handleEnded);
+
+    return () => {
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('ended', handleEnded);
+    };
+  }, [landingState]);
+
+  // 2. Scroll Progress & Street View Section Activation
   useEffect(() => {
     const handleScroll = () => {
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
       const currentScroll = window.scrollY;
       const progress = totalHeight > 0 ? currentScroll / totalHeight : 0;
       setScrollProgress(progress);
+
+      if (currentScroll > 400 && landingState !== 'STREET_VIEW' && landingState !== 'STREET_TRANSITION') {
+        setLandingState('STREET_VIEW');
+      }
 
       if (currentScroll < 500) setActiveSection('hero');
       else if (currentScroll < 1200) setActiveSection('blackout');
@@ -87,263 +96,320 @@ export const LandingPage: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [landingState]);
+
+  // Trigger Camera Zoom from 3D Earth into Street View
+  const handleLaunchTransition = () => {
+    if (landingState === 'STREET_TRANSITION' || landingState === 'STREET_VIEW') return;
+    setLandingState('STREET_TRANSITION');
+  };
+
+  const handleZoomComplete = () => {
+    setLandingState('STREET_VIEW');
+    const el = document.getElementById('hero-streetview');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const scrollToSection = (id: string) => {
+    if (id === 'hero') window.scrollTo({ top: 0, behavior: 'smooth' });
+    else {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
-    <div className="relative min-h-screen bg-[#04060c] text-[#E8E6F5] overflow-x-hidden font-sans select-none">
+    <div className="relative min-h-screen bg-[#020B18] text-[#FFFFFF] overflow-x-hidden font-sans select-none">
       
-      {/* ── PERSISTENT TOP NAVIGATION BAR ── */}
-      <PersistentNavHeader
-        currentSection={activeSection}
+      {/* ── TOP NAV BAR ── */}
+      <HeroNavbar
         onNavigateCockpit={() => setStoreView('predictor')}
+        onScrollToSection={scrollToSection}
       />
 
-      {/* ── BACKGROUND 3D STREETVIEW CANVAS ── */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <CyberHighwayCanvas
-          scrollProgress={scrollProgress}
-          isBlackout={activeSection === 'blackout'}
-        />
-      </div>
-
-      {/* ── SATELLITE INTRO VIDEO LAYER WITH CYAN-TO-EMERALD GRADIENT HEADING ─── */}
-      <AnimatePresence>
-        {!introFinished && (
-          <motion.div
-            initial={{ opacity: 1 }}
-            animate={isZooming ? { opacity: 0, scale: 1.35 } : { opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
-            onClick={handleStartZoomTransition}
-            className="fixed inset-0 z-50 bg-[#04060c] flex flex-col justify-center items-center px-4 select-none cursor-none overflow-hidden"
+      {/* ── 1. HERO SECTION CONTAINER (PHONE → ROUTE → LIVE 3D EARTH) ── */}
+      <section id="hero" className="relative w-full h-screen min-h-[720px] flex flex-col justify-between pt-20 overflow-hidden bg-[#020B18]">
+        
+        {/* Background MP4 Intro Video Layer (Phone → Route → Planetary Horizon) */}
+        <div className={`absolute inset-0 transition-opacity duration-700 pointer-events-none z-0 ${
+          landingState === 'INTRO_VIDEO' || landingState === 'EARTH_HANDOFF' ? 'opacity-100' : 'opacity-0'
+        }`}>
+          <video
+            ref={finalVideoRef}
+            muted
+            playsInline
+            preload="auto"
+            className="w-full h-full object-cover object-center filter brightness-95 contrast-105"
           >
-            {/* Centered Full-Screen Video 5 Layer (Preserved at opacity-75) */}
-            <video
-              ref={video5Ref}
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="auto"
-              onCanPlay={(e) => e.currentTarget.play().catch(() => {})}
-              onWaiting={(e) => e.currentTarget.play().catch(() => {})}
-              className="absolute inset-0 w-full h-full object-cover object-center opacity-75 scale-105 pointer-events-none"
-            >
-              <source src="/video5.mp4" type="video/mp4" />
-            </video>
-
-            {/* Base Background Infinite Image Carousel Strip (Subtle Dim Base Transparency) */}
-            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 opacity-25 pointer-events-none overflow-hidden flex z-0 py-4">
-              <motion.div
-                animate={{ x: ['0%', '-50%'] }}
-                transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
-                className="flex gap-6 min-w-max px-4"
-              >
-                {['/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg'].map((imgSrc, i) => (
-                  <div key={i} className="w-72 h-44 sm:w-96 sm:h-56 md:w-[420px] md:h-64 rounded-3xl overflow-hidden border border-white/20 shadow-[0_0_20px_rgba(0,229,255,0.1)] bg-black/60 flex-shrink-0">
-                    <img src={imgSrc} alt={`Carousel ${i}`} className="w-full h-full object-cover opacity-50 transition-transform duration-500" />
-                  </div>
-                ))}
-              </motion.div>
-            </div>
-
-            {/* Interactive Cyan Spotlight Beam (Follows cursor, adds vivid glow on hover) */}
-            <div
-              className="absolute inset-0 pointer-events-none z-1"
-              style={{
-                background: `radial-gradient(320px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0, 229, 255, 0.25) 0%, rgba(46, 230, 166, 0.08) 45%, transparent 75%)`,
-              }}
-            />
-
-            {/* High-Contrast Spotlight Carousel Overlay (Reveals pictures with 100% full clarity when hovering cursor over them) */}
-            <div
-              className="absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none overflow-hidden flex z-2 py-4"
-              style={{
-                WebkitMaskImage: `radial-gradient(280px circle at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
-                maskImage: `radial-gradient(280px circle at ${mousePos.x}px ${mousePos.y}px, black 0%, transparent 100%)`,
-              }}
-            >
-              <motion.div
-                animate={{ x: ['0%', '-50%'] }}
-                transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
-                className="flex gap-6 min-w-max px-4"
-              >
-                {['/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg', '/pic1.jpg', '/pic2.jpg', '/pic3.jpg', '/pic4.jpg'].map((imgSrc, i) => (
-                  <div key={i} className="w-72 h-44 sm:w-96 sm:h-56 md:w-[420px] md:h-64 rounded-3xl overflow-hidden border-2 border-[#00E5FF] shadow-[0_0_60px_rgba(0,229,255,0.9)] bg-black flex-shrink-0">
-                    <img src={imgSrc} alt={`Spotlight Carousel ${i}`} className="w-full h-full object-cover opacity-100 scale-105" />
-                  </div>
-                ))}
-              </motion.div>
-            </div>
-
-            {/* Subtle Non-Obscuring Ambient Vignette */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#04060c]/40 via-transparent to-[#04060c]/40 pointer-events-none z-5" />
-
-            {/* Central Spaced Ultra-Transparent Glass Container Box */}
-            <div className="relative z-10 bg-[#060913]/35 backdrop-blur-md border border-white/25 rounded-3xl p-6 sm:p-8 md:p-10 shadow-[0_0_90px_rgba(0,229,255,0.3)] flex flex-col items-center justify-center max-w-2xl text-center mx-4 my-auto group">
-              
-              {/* NAVISYNC Pure CSS Text Logotype */}
-              <motion.div
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                whileHover={{ scale: 1.05, y: -2 }}
-                transition={{ duration: 0.25, ease: 'easeOut' }}
-                className="mb-5 text-center pointer-events-auto relative inline-block cursor-none select-none transition-all duration-300 hover:drop-shadow-[0_0_50px_rgba(0,229,255,1)]"
-              >
-                <div className="relative inline-flex items-center justify-center font-black italic tracking-tighter text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-none drop-shadow-[0_0_35px_rgba(0,229,255,0.8)] px-3 py-1 overflow-visible">
-                  
-                  {/* NAVI in Pure Bold White */}
-                  <span className="text-white hover:text-[#00E5FF] transition-colors duration-300">NAVI</span>
-
-                  {/* SYNC in Cyan-to-Emerald Gradient */}
-                  <span className="bg-gradient-to-r from-[#00E5FF] via-[#00E5FF] to-[#2EE6A6] bg-clip-text text-transparent pr-2 hover:brightness-125 transition-all duration-300">
-                    SYNC
-                  </span>
-
-                  {/* Cyber Streak Lines on Right Side of C */}
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-1 pointer-events-none opacity-85">
-                    <span className="w-5 h-[2px] bg-[#2EE6A6] rounded-full shadow-[0_0_8px_#2EE6A6]" />
-                    <span className="w-9 h-[2px] bg-[#00E5FF] rounded-full shadow-[0_0_8px_#00E5FF]" />
-                    <span className="w-4 h-[2px] bg-[#2EE6A6] rounded-full shadow-[0_0_8px_#2EE6A6]" />
-                  </div>
-
-                </div>
-
-                {/* Subtitle Line with Interactive Highlight */}
-                <div className="text-[9px] sm:text-[10px] md:text-[11px] font-mono font-bold tracking-[0.35em] text-slate-200 uppercase mt-0.5 drop-shadow-[0_0_12px_rgba(0,229,255,0.5)] hover:text-[#00E5FF] hover:tracking-[0.4em] transition-all duration-300">
-                  INTELLIGENT DEAD RECKONING ENGINE
-                </div>
-              </motion.div>
-
-              {/* Compact Holographic HUD Target Crosshair Ring */}
-              <motion.div
-                animate={isZooming ? { scale: 24, opacity: 0 } : { scale: [0.97, 1.03, 0.97] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                className="flex flex-col items-center justify-center mb-4 pointer-events-none"
-              >
-                <div className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full border border-[#00E5FF]/40 flex items-center justify-center shadow-[0_0_25px_rgba(0,229,255,0.4)]">
-                  <div className="absolute inset-0 rounded-full border border-dashed border-[#2EE6A6]/60 animate-spin" style={{ animationDuration: '18s' }} />
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#00E5FF]/20 border border-[#00E5FF]/60 flex items-center justify-center backdrop-blur-sm">
-                    <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#00E5FF] animate-pulse" />
-                  </div>
-                </div>
-
-                <div className="mt-2 bg-[#0c0f19]/70 backdrop-blur-md px-3 py-0.5 rounded-full border border-[#00E5FF]/50 text-[#00E5FF] text-[10px] font-mono font-medium flex items-center gap-2 shadow-lg">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34D399] animate-pulse" />
-                  <span>Satellite Signal Acquired</span>
-                </div>
-              </motion.div>
-
-              {/* Cyan-to-Emerald Glowing Editorial Serif Heading with Hover Glow */}
-              <div className="pointer-events-none space-y-2 mt-2">
-                <h1 className="font-display italic text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal leading-tight bg-gradient-to-r from-white via-[#00E5FF] to-[#2EE6A6] bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(0,229,255,0.6)] group-hover:drop-shadow-[0_0_45px_rgba(0,229,255,0.9)] transition-all duration-300">
-                  Continuous vehicle navigation when GNSS disappears.
-                </h1>
-                <span className="font-mono text-[10px] sm:text-[11px] text-[#00E5FF] tracking-widest uppercase block animate-pulse">
-                  Click anywhere or scroll to descend into street view
-                </span>
-              </div>
-
-            </div>
-
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── REVEALED STREETVIEW & 11 STORY SECTIONS ─────────────────────────── */}
-      <div className={introFinished ? 'opacity-100 transition-opacity duration-700' : 'opacity-0'}>
-        {/* ── SECTION 1: HERO ENTRY (Cyan-to-Emerald Gradient Title) ───── */}
-        <section id="hero" className="relative z-10 min-h-screen flex flex-col justify-center items-center px-4 text-center max-w-4xl mx-auto pt-24">
-          
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#3b82f6]/15 border border-[#3b82f6]/40 text-[#00E5FF] text-xs font-semibold mb-6">
-            <Zap className="w-4 h-4 text-[#00E5FF] animate-pulse" />
-            <span>AI-ML Based Intelligent Dead Reckoning · SIH 2026</span>
-          </div>
-
-          {/* Glowing Editorial Serif Title matching uploaded image */}
-          <h1 className="font-display italic text-4xl md:text-6xl font-normal tracking-tight bg-gradient-to-r from-white via-[#00E5FF] to-[#2EE6A6] bg-clip-text text-transparent mb-4 leading-tight drop-shadow-[0_0_35px_rgba(0,229,255,0.45)]">
-            Intelligent Dead Reckoning
-          </h1>
-
-          <p className="text-lg md:text-xl text-slate-300 max-w-2xl mb-8 leading-relaxed font-sans">
-            Continuous vehicle navigation when GNSS signals disappear.
-          </p>
-
-          <div className="flex items-center gap-4 flex-wrap justify-center mb-10">
-            <button
-              onClick={() => setStoreView('predictor')}
-              className="py-3.5 px-8 rounded-xl font-semibold text-sm text-black bg-gradient-to-r from-[#2EE6A6] via-[#1FBF9C] to-[#3b82f6] shadow-[0_0_35px_rgba(46,230,166,0.4)] flex items-center justify-center gap-2.5 cursor-pointer hover:scale-105 transition-transform"
-            >
-              <span>Launch Navigation Engine</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="text-slate-500 text-xs font-mono flex flex-col items-center gap-2 animate-bounce">
-            <span>SCROLL TO ENTER STREETVIEW TUNNEL</span>
-            <ArrowDown className="w-4 h-4 text-[#00E5FF]" />
-          </div>
-
-        </section>
-
-        {/* ── SECTION 2: SIGNATURE BLACKOUT TRANSITION ───────────────────── */}
-        <div className="relative z-10">
-          <BlackoutTransition />
+            <source src="/final.mp4" type="video/mp4" />
+          </video>
+          {/* Subtle Prussian Blue Vignette Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#020B18]/70 via-transparent to-[#020B18]/90 pointer-events-none" />
         </div>
 
-        {/* ── SECTION 3: CONTINUOUS ENGINE PIPELINE ──────────────────────── */}
-        <div id="pipeline" className="relative z-10 pt-16">
+        {/* Live Three.js Interactive 3D Earth Canvas Layer */}
+        <div className={`absolute inset-0 transition-opacity duration-700 z-0 ${
+          landingState === 'EARTH_HANDOFF' || landingState === 'INTERACTIVE_EARTH' || landingState === 'STREET_TRANSITION'
+            ? 'opacity-100 pointer-events-auto'
+            : 'opacity-0 pointer-events-none'
+        }`}>
+          <InteractiveEarthCanvas
+            onEarthClick={handleLaunchTransition}
+            onHoverStateChange={setEarthHovered}
+            isZoomingToStreet={landingState === 'STREET_TRANSITION'}
+            onZoomComplete={handleZoomComplete}
+          />
+        </div>
+
+        {/* ── 2. HERO HTML OVERLAY (SYNCED WITH VIDEO / EARTH) ── */}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 pt-8 sm:pt-12 flex flex-col items-start w-full">
+          
+          {/* Synced Badge: 0.5s */}
+          <AnimatePresence>
+            {showBadge && (
+              <motion.div
+                initial={{ opacity: 0, y: -15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#031426]/75 backdrop-blur-md border border-[#00D9FF]/35 shadow-[0_0_20px_rgba(0,217,255,0.25)] text-[#00D9FF] text-xs font-semibold mb-6"
+              >
+                <Zap className="w-4 h-4 text-[#00D9FF] animate-pulse" />
+                <span>AI-ML Based Intelligent Dead Reckoning · SIH 2026</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Synced Main Heading: 1.0s */}
+          <AnimatePresence>
+            {showHeading && (
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, ease: 'easeOut' }}
+                className="font-display italic text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.05] max-w-3xl drop-shadow-[0_0_40px_rgba(0,217,255,0.3)] mb-4"
+              >
+                <span className="text-white block">Intelligent</span>
+                <span className="bg-gradient-to-r from-white via-[#00D9FF] to-[#00E6B8] bg-clip-text text-transparent">
+                  Dead Reckoning
+                </span>
+              </motion.h1>
+            )}
+          </AnimatePresence>
+
+          {/* Synced Subtitle: 1.5s */}
+          <AnimatePresence>
+            {showSubtitle && (
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+                className="text-base sm:text-lg md:text-xl text-[#B7C7D9] max-w-xl mb-8 font-sans leading-relaxed"
+              >
+                Continuous vehicle navigation when GNSS signals disappear.
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          {/* Synced CTA & Scroll Indicator: 2.0s */}
+          <AnimatePresence>
+            {showCTA && (
+              <motion.div
+                initial={{ opacity: 0, y: 25 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+                className="flex flex-col sm:flex-row items-start sm:items-center gap-6"
+              >
+                <button
+                  onClick={handleLaunchTransition}
+                  className="py-4 px-8 rounded-full font-bold text-sm text-white bg-gradient-to-r from-[#00D9FF] via-[#168CFF] to-[#7657FF] shadow-[0_0_35px_rgba(0,217,255,0.5)] flex items-center justify-center gap-3 cursor-pointer hover:scale-105 hover:shadow-[0_0_50px_rgba(0,217,255,0.8)] transition-all group"
+                >
+                  <span>Launch Navigation Engine</span>
+                  <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
+                </button>
+
+                <div
+                  onClick={handleLaunchTransition}
+                  className="flex items-center gap-3 text-slate-400 text-xs font-mono tracking-widest uppercase cursor-pointer hover:text-[#00D9FF] transition-colors group py-2"
+                >
+                  <span>SCROLL TO ENTER STREETVIEW TUNNEL</span>
+                  <ArrowDown className="w-4 h-4 text-[#00D9FF] animate-bounce" />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+        </div>
+
+        {/* ── SATELLITE SIGNAL STATUS CARD (OVER 3D EARTH) ── */}
+        <AnimatePresence>
+          {(landingState === 'INTERACTIVE_EARTH' || landingState === 'EARTH_HANDOFF') && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute right-6 sm:right-12 bottom-24 z-20 bg-[#031426]/85 backdrop-blur-xl border border-[#00D9FF]/40 rounded-2xl p-4 sm:p-5 shadow-[0_0_40px_rgba(0,217,255,0.3)] max-w-xs text-xs font-sans space-y-2 pointer-events-none"
+            >
+              <div className="flex items-center gap-2 text-[#00E6B8] font-mono font-bold tracking-wider text-[11px] uppercase">
+                <span className="w-2 h-2 rounded-full bg-[#00E6B8] shadow-[0_0_8px_#00E6B8] animate-pulse" />
+                <span>SATELLITE SIGNAL ACQUIRED</span>
+              </div>
+              <div className="flex justify-between items-center text-[#B7C7D9] pt-1">
+                <span>Satellites in range:</span>
+                <span className="text-white font-mono font-bold">12 Active</span>
+              </div>
+              <div className="flex justify-between items-center text-[#B7C7D9]">
+                <span>Signal strength:</span>
+                <span className="text-[#00D9FF] font-semibold">Excellent (99.8%)</span>
+              </div>
+              <div className="flex justify-between items-center text-[#B7C7D9]">
+                <span>Position:</span>
+                <span className="text-white font-mono text-[10px]">28.6139° N, 77.2090° E</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Earth Hover Exploration Tooltip Prompt */}
+        <AnimatePresence>
+          {earthHovered && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="absolute left-1/2 -translate-x-1/2 bottom-12 z-20 bg-[#00D9FF] text-black font-bold text-xs px-4 py-2 rounded-full shadow-[0_0_30px_#00D9FF] flex items-center gap-2 pointer-events-none"
+            >
+              <span>Explore this location</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+      </section>
+
+      {/* ── 3. FEATURE CARDS BAR (Matching Reference Image media_1788800823357.jpg) ── */}
+      <section id="features" className="relative z-10 py-16 bg-[#031426] border-y border-white/10 px-6 md:px-12">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          
+          <div className="bg-[#041B2D]/80 border border-[#00D9FF]/25 rounded-2xl p-6 shadow-[0_0_25px_rgba(0,217,255,0.15)] hover:border-[#00D9FF]/60 hover:scale-105 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-[#00D9FF]/15 border border-[#00D9FF]/40 flex items-center justify-center text-[#00D9FF] mb-4">
+              <Radio className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Satellite Powered</h3>
+            <p className="text-xs text-[#B7C7D9] leading-relaxed">
+              Real-time positioning with multi-satellite constellation support.
+            </p>
+          </div>
+
+          <div className="bg-[#041B2D]/80 border border-[#00E6B8]/25 rounded-2xl p-6 shadow-[0_0_25px_rgba(0,230,184,0.15)] hover:border-[#00E6B8]/60 hover:scale-105 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-[#00E6B8]/15 border border-[#00E6B8]/40 flex items-center justify-center text-[#00E6B8] mb-4">
+              <Cpu className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">AI Enhanced</h3>
+            <p className="text-xs text-[#B7C7D9] leading-relaxed">
+              Smarter routes, neural velocity predictions, zero hassle.
+            </p>
+          </div>
+
+          <div className="bg-[#041B2D]/80 border border-[#168CFF]/25 rounded-2xl p-6 shadow-[0_0_25px_rgba(22,140,255,0.15)] hover:border-[#168CFF]/60 hover:scale-105 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-[#168CFF]/15 border border-[#168CFF]/40 flex items-center justify-center text-[#168CFF] mb-4">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">High Accuracy</h3>
+            <p className="text-xs text-[#B7C7D9] leading-relaxed">
+              Centimeter-level dead reckoning precision for smoother journeys.
+            </p>
+          </div>
+
+          <div className="bg-[#041B2D]/80 border border-[#7657FF]/25 rounded-2xl p-6 shadow-[0_0_25px_rgba(118,87,255,0.15)] hover:border-[#7657FF]/60 hover:scale-105 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-[#7657FF]/15 border border-[#7657FF]/40 flex items-center justify-center text-[#7657FF] mb-4">
+              <Globe className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Global Coverage</h3>
+            <p className="text-xs text-[#B7C7D9] leading-relaxed">
+              Navigate anywhere on Earth, even deep inside tunnels & urban canyons.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ── 4. STREET VIEW ENVIRONMENT (Matching media_1788800836866.png) ── */}
+      <div id="hero-streetview" className="relative z-10 min-h-screen bg-[#020B18]">
+        
+        {/* Background 3D Street View Tunnel Canvas */}
+        <div className="relative w-full h-[650px] overflow-hidden border-b border-white/10">
+          <CyberHighwayCanvas scrollProgress={scrollProgress} />
+
+          {/* Overlay CTA inside 3D Tunnel */}
+          <div className="absolute inset-0 flex flex-col justify-center items-center px-4 text-center z-10 pointer-events-none">
+            <div className="bg-[#020B18]/85 backdrop-blur-2xl border border-white/15 rounded-3xl p-8 max-w-2xl text-center shadow-[0_0_80px_rgba(0,217,255,0.3)]">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00D9FF]/15 border border-[#00D9FF]/40 text-[#00D9FF] text-xs font-mono mb-4">
+                <Compass className="w-3.5 h-3.5 animate-spin" />
+                <span>3D STREET VIEW ENVIRONMENT ACTIVE</span>
+              </div>
+              <h2 className="font-display italic text-3xl md:text-5xl font-normal text-white mb-3 leading-tight">
+                Dive into Street View
+              </h2>
+              <p className="text-sm text-[#B7C7D9] max-w-lg mx-auto mb-6">
+                Real-time 10Hz phone IMU acceleration, gyro orientation & AI dead reckoning fusion.
+              </p>
+              <button
+                onClick={() => setStoreView('predictor')}
+                className="py-3 px-8 rounded-full font-bold text-xs text-black bg-[#00E6B8] hover:bg-[#00D9FF] shadow-[0_0_30px_#00E6B8] transition-all cursor-pointer pointer-events-auto"
+              >
+                Enter Navigation Cockpit Engine →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── STORY SECTIONS (PIPELINE, DRIFT, MAP MATCHING, BENCHMARKS) ── */}
+        <div id="pipeline" className="relative z-10">
           <EnginePipelineSection />
         </div>
 
-        {/* ── SECTION 4: PHONE ALIGNMENT ─────────────────────────────────── */}
         <div className="relative z-10">
           <PhoneAlignmentSection />
         </div>
 
-        {/* ── SECTION 5: AI SIGNAL FILTER ────────────────────────────────── */}
         <div className="relative z-10">
           <SignalFilterSection />
         </div>
 
-        {/* ── SECTION 6: DRIFT COMPARISON ────────────────────────────────── */}
-        <div id="dr" className="relative z-10 pt-16">
+        <div id="dr" className="relative z-10">
           <DriftComparisonSection />
         </div>
 
-        {/* ── SECTION 7: MAP MATCHING & ROAD CONSTRAINTS ────────────────── */}
-        <div id="map-matching" className="relative z-10 pt-16">
+        <div id="map-matching" className="relative z-10">
           <MapMatchingSection />
         </div>
 
-        {/* ── SECTION 8: JUMP-FREE GNSS RETURN ───────────────────────────── */}
         <div className="relative z-10">
           <GnssReturnSection />
         </div>
 
-        {/* ── SECTION 10: QUANTITATIVE BENCHMARK RESULTS ────────────────── */}
-        <div id="benchmarks" className="relative z-10 pt-16">
+        <div id="benchmarks" className="relative z-10">
           <ResultsBenchmarkSection />
         </div>
 
-        {/* ── SECTION 11: EDGE ARCHITECTURE ──────────────────────────────── */}
-        <div className="relative z-10">
+        <div id="about" className="relative z-10">
           <EdgeArchitectureSection />
         </div>
 
         {/* Footer */}
-        <footer className="relative z-10 py-16 text-center border-t border-white/5 bg-[#030408]">
-          <h3 className="font-display italic text-2xl text-white mb-2 drop-shadow-[0_0_20px_rgba(46,230,166,0.3)]">Experience the Navigation Engine</h3>
-          <p className="text-xs text-slate-400 max-w-md mx-auto mb-6">
-            Real 10Hz synchronized IO-VNBD dataset replay & outage injection.
+        <footer className="relative z-10 py-16 text-center border-t border-white/10 bg-[#020B18]">
+          <h3 className="font-display italic text-2xl text-white mb-2 drop-shadow-[0_0_20px_rgba(0,217,255,0.3)]">Experience NaviSync Engine</h3>
+          <p className="text-xs text-[#B7C7D9] max-w-md mx-auto mb-6">
+            ISRO Smart India Hackathon 2026 — Problem Statement 26168.
           </p>
           <button
             onClick={() => setStoreView('predictor')}
-            className="py-3 px-6 rounded-xl font-semibold text-xs text-black bg-[#2EE6A6] hover:bg-emerald-400 transition-colors cursor-pointer"
+            className="py-3 px-6 rounded-full font-bold text-xs text-black bg-gradient-to-r from-[#00D9FF] to-[#00E6B8] hover:scale-105 transition-transform cursor-pointer"
           >
             Enter Navigation Engine
           </button>
         </footer>
+
       </div>
 
     </div>

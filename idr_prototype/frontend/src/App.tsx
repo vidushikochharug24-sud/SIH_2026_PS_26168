@@ -19,13 +19,15 @@ export const App: React.FC = () => {
       {/* ── GLOBAL GPS NAVIGATION ARROW & BREADCRUMB TRAIL ────── */}
       <GpsCursorTrail />
 
-      {/* ── BACKGROUND 3D STREETVIEW CANVAS (Visible in background) ────── */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-40">
-        <CyberHighwayCanvas scrollProgress={0.5} />
-      </div>
-
-      {/* Dark Vignette Overlay for Crisp Readability */}
-      <div className="fixed inset-0 bg-gradient-to-t from-[#04060c] via-[#04060c]/60 to-[#04060c]/90 pointer-events-none z-0" />
+      {/* ── BACKGROUND 3D STREETVIEW CANVAS (Visible in Predictor View) ────── */}
+      {currentView === 'predictor' && (
+        <>
+          <div className="fixed inset-0 pointer-events-none z-0 opacity-40">
+            <CyberHighwayCanvas scrollProgress={0.5} />
+          </div>
+          <div className="fixed inset-0 bg-gradient-to-t from-[#04060c] via-[#04060c]/60 to-[#04060c]/90 pointer-events-none z-0" />
+        </>
+      )}
 
       <AnimatePresence mode="wait">
         {currentView === 'landing' ? (
