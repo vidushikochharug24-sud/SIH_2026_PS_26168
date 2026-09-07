@@ -33,18 +33,21 @@ export const LandingPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState('hero');
   const finalVideoRef = useRef<HTMLVideoElement | null>(null);
 
-  // 1. MP4 Hero Video Auto-Play & Completion Handoff
+  // 1. MP4 Hero Video Auto-Play & Pause on Signal Acquired Frame
   useEffect(() => {
     const video = finalVideoRef.current;
     if (!video) return;
 
-    video.currentTime = 0;
-    video.play().catch(err => console.warn('Hero video autoplay fallback:', err));
+    if (landingState === 'INTRO_VIDEO') {
+      video.currentTime = 0;
+      video.play().catch(err => console.warn('Hero video autoplay fallback:', err));
+    }
 
     const handleTimeUpdate = () => {
-      // Handoff to Signal Achieved state when video nears completion
-      if (video.duration && video.currentTime >= video.duration - 0.3) {
+      // Pause video when it reaches the Satellite Signal Acquired frame
+      if (video.duration && video.currentTime >= video.duration - 0.4) {
         if (landingState === 'INTRO_VIDEO') {
+          video.pause();
           setLandingState('SIGNAL_ACHIEVED');
         }
       }
@@ -52,6 +55,7 @@ export const LandingPage: React.FC = () => {
 
     const handleEnded = () => {
       if (landingState === 'INTRO_VIDEO') {
+        video.pause();
         setLandingState('SIGNAL_ACHIEVED');
       }
     };
@@ -161,27 +165,66 @@ export const LandingPage: React.FC = () => {
           />
         </div>
 
-        {/* ── 2. STEP 2 OVERLAY: SATELLITE SIGNAL ACQUIRED CLICK PROMPT ── */}
+        {/* ── 2. STEP 2 OVERLAY: HUD SATELLITE SIGNAL ACQUIRED BUTTON (ALIGN EXACTLY OVER VIDEO HUD CARD) ── */}
         <AnimatePresence>
           {landingState === 'SIGNAL_ACHIEVED' && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              onClick={handleSignalClick}
-              className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#020B18]/75 backdrop-blur-md cursor-pointer px-4 text-center"
+              className="absolute right-[6%] md:right-[11%] top-[20%] md:top-[24%] z-30 flex flex-col items-end"
             >
-              <div className="inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-[#031426]/90 border border-[#00E6B8] text-[#00E6B8] text-sm font-mono font-bold tracking-widest uppercase mb-6 shadow-[0_0_35px_rgba(0,230,184,0.5)] animate-pulse">
-                <span className="w-3 h-3 rounded-full bg-[#00E6B8] shadow-[0_0_12px_#00E6B8]" />
-                <span>SATELLITE SIGNAL ACQUIRED</span>
+              {/* Cyber HUD Card aligned exactly on top of video HUD card */}
+              <div className="relative bg-[#020B18]/90 backdrop-blur-2xl border border-[#00D9FF]/70 rounded-xl p-6 shadow-[0_0_60px_rgba(0,217,255,0.5)] w-[340px] sm:w-[420px]">
+                
+                {/* Cyber Corner Brackets */}
+                <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-[#00D9FF]" />
+                <div className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-[#00D9FF]" />
+                <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-[#00D9FF]" />
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-[#00D9FF]" />
+
+                {/* Header */}
+                <div className="border-b border-[#00D9FF]/25 pb-3 mb-4 flex items-center justify-between">
+                  <h3 className="text-[#00D9FF] font-mono font-bold tracking-widest text-sm sm:text-base uppercase flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#00E6B8] animate-ping" />
+                    SATELLITE SIGNAL ACQUIRED
+                  </h3>
+                </div>
+
+                {/* Content Body: Ring Gauge + Sat Stats */}
+                <div className="flex items-center gap-6 my-3">
+                  {/* Radial Ring Gauge */}
+                  <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
+                    <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                      <path className="text-slate-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                      <path className="text-[#00D9FF]" strokeDasharray="85, 100" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <div className="absolute flex flex-col items-center">
+                      <span className="text-white font-mono font-bold text-sm leading-none">12</span>
+                      <span className="text-[#00D9FF] text-[9px] font-mono leading-none mt-0.5">37%</span>
+                    </div>
+                  </div>
+
+                  {/* Satellite Stats */}
+                  <div className="space-y-1.5 text-xs sm:text-sm font-sans">
+                    <div className="text-white font-medium">12 Satellites in range</div>
+                    <div className="text-slate-300">22 Satellites in view</div>
+                    <div className="text-slate-300">
+                      Signal strength: <span className="text-[#00E6B8] font-bold">Excellent</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Interactive Pulsing Satellite Signal Button */}
+                <button
+                  onClick={handleSignalClick}
+                  className="w-full mt-5 py-3.5 px-6 rounded-lg font-bold text-xs sm:text-sm text-black bg-gradient-to-r from-[#00D9FF] via-[#00E6B8] to-[#00D9FF] shadow-[0_0_40px_rgba(0,217,255,0.8)] flex items-center justify-center gap-2.5 hover:scale-[1.03] active:scale-[0.98] transition-all cursor-pointer group"
+                >
+                  <Globe className="w-4.5 h-4.5 text-black group-hover:rotate-45 transition-transform" />
+                  <span className="tracking-wider uppercase font-mono font-bold">INITIALIZE 3D GLOBE →</span>
+                </button>
+
               </div>
-              <button
-                onClick={handleSignalClick}
-                className="py-4 px-8 rounded-full font-bold text-base text-black bg-gradient-to-r from-[#00D9FF] via-[#00E6B8] to-[#00D9FF] shadow-[0_0_40px_rgba(0,217,255,0.7)] flex items-center gap-3 hover:scale-105 transition-all cursor-pointer"
-              >
-                <span>Click to Initialize 3D Globe & Text →</span>
-                <Globe className="w-5 h-5" />
-              </button>
             </motion.div>
           )}
         </AnimatePresence>
