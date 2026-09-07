@@ -283,10 +283,10 @@ export const LandingPage: React.FC = () => {
                 </div>
 
                 {/* Main Heading */}
-                <h1 className="font-display italic text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.05] max-w-3xl drop-shadow-[0_0_40px_rgba(0,217,255,0.3)] mb-4">
-                  <span className="text-white block">Intelligent</span>
+                <h1 className="font-display italic text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-normal tracking-tight leading-[1.1] max-w-4xl drop-shadow-[0_0_40px_rgba(0,217,255,0.3)] mb-4">
+                  <span className="text-white block">NaviSync: An Intelligent</span>
                   <span className="bg-gradient-to-r from-white via-[#00D9FF] to-[#00E6B8] bg-clip-text text-transparent">
-                    Dead Reckoning
+                    Dead Reckoning Engine
                   </span>
                 </h1>
 
