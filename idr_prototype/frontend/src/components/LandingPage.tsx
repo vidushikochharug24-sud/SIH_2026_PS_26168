@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Zap, ArrowDown, Radio, ShieldCheck, Globe, Cpu, Target, Compass, Sparkles, Navigation } from 'lucide-react';
+import { ArrowRight, Zap, ArrowDown, Radio, ShieldCheck, Globe, Cpu, Target, Compass, Sparkles, Navigation, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useReplayStore } from '../state/replayStore';
 import { HeroNavbar } from './HeroNavbar';
 import { InteractiveEarthCanvas } from './InteractiveEarthCanvas';
@@ -32,6 +32,16 @@ export const LandingPage: React.FC = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState('hero');
   const finalVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  // Feature Cards Carousel State
+  const [carouselIdx, setCarouselIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCarouselIdx((prev) => (prev + 1) % 4);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
 
   // 1. MP4 Hero Video Auto-Play & Pause on Signal Acquired Frame
   useEffect(() => {
@@ -358,48 +368,128 @@ export const LandingPage: React.FC = () => {
 
       </section>
 
-      {/* ── 3. FEATURE CARDS BAR (Matching Reference Image media_1788800823357.jpg) ── */}
-      <section id="features" className="relative z-10 py-16 bg-[#031426] border-y border-white/10 px-6 md:px-12">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* ── 3. FEATURE CARDS CAROUSEL ── */}
+      <section id="features" className="relative z-10 py-16 bg-[#031426] border-y border-white/10 px-6 md:px-12 overflow-hidden">
+        <div className="max-w-4xl mx-auto flex flex-col items-center">
           
-          <div className="bg-[#041B2D]/80 border border-[#00D9FF]/25 rounded-2xl p-6 shadow-[0_0_25px_rgba(0,217,255,0.15)] hover:border-[#00D9FF]/60 hover:scale-105 transition-all">
-            <div className="w-12 h-12 rounded-xl bg-[#00D9FF]/15 border border-[#00D9FF]/40 flex items-center justify-center text-[#00D9FF] mb-4">
-              <Radio className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2">Satellite Powered</h3>
-            <p className="text-xs text-[#B7C7D9] leading-relaxed">
-              Real-time positioning with multi-satellite constellation support.
-            </p>
+          <div className="text-center mb-8">
+            <span className="text-[#00D9FF] font-mono text-xs font-bold tracking-widest uppercase mb-1 block">CORE CAPABILITIES</span>
+            <h2 className="font-display italic text-3xl md:text-4xl text-white font-normal">Engine Features</h2>
           </div>
 
-          <div className="bg-[#041B2D]/80 border border-[#00E6B8]/25 rounded-2xl p-6 shadow-[0_0_25px_rgba(0,230,184,0.15)] hover:border-[#00E6B8]/60 hover:scale-105 transition-all">
-            <div className="w-12 h-12 rounded-xl bg-[#00E6B8]/15 border border-[#00E6B8]/40 flex items-center justify-center text-[#00E6B8] mb-4">
-              <Cpu className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2">AI Enhanced</h3>
-            <p className="text-xs text-[#B7C7D9] leading-relaxed">
-              Smarter routes, neural velocity predictions, zero hassle.
-            </p>
+          {/* Carousel Interactive Card Frame */}
+          <div className="relative w-full max-w-2xl flex items-center justify-center">
+            
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={carouselIdx}
+                initial={{ opacity: 0, x: 40, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -40, scale: 0.95 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className={`w-full bg-[#041B2D]/90 border rounded-3xl p-8 md:p-10 ${
+                  carouselIdx === 0
+                    ? 'border-[#00D9FF]/60 shadow-[0_0_40px_rgba(0,217,255,0.3)]'
+                    : carouselIdx === 1
+                    ? 'border-[#00E6B8]/60 shadow-[0_0_40px_rgba(0,230,184,0.3)]'
+                    : carouselIdx === 2
+                    ? 'border-[#168CFF]/60 shadow-[0_0_40px_rgba(22,140,255,0.3)]'
+                    : 'border-[#7657FF]/60 shadow-[0_0_40px_rgba(118,87,255,0.3)]'
+                } backdrop-blur-xl flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left`}
+              >
+                {carouselIdx === 0 && (
+                  <>
+                    <div className="w-16 h-16 rounded-2xl bg-[#00D9FF]/15 border border-[#00D9FF]/40 text-[#00D9FF] flex items-center justify-center shrink-0">
+                      <Radio className="w-8 h-8" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-mono font-bold tracking-widest text-[#00D9FF] uppercase mb-1">FEATURE 01 / 04</span>
+                      <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">Satellite Powered</h3>
+                      <p className="text-sm md:text-base text-[#B7C7D9] leading-relaxed font-sans">
+                        Real-time positioning with multi-satellite constellation support.
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {carouselIdx === 1 && (
+                  <>
+                    <div className="w-16 h-16 rounded-2xl bg-[#00E6B8]/15 border border-[#00E6B8]/40 text-[#00E6B8] flex items-center justify-center shrink-0">
+                      <Cpu className="w-8 h-8" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-mono font-bold tracking-widest text-[#00E6B8] uppercase mb-1">FEATURE 02 / 04</span>
+                      <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">AI Enhanced</h3>
+                      <p className="text-sm md:text-base text-[#B7C7D9] leading-relaxed font-sans">
+                        Smarter routes, neural velocity predictions, zero hassle.
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {carouselIdx === 2 && (
+                  <>
+                    <div className="w-16 h-16 rounded-2xl bg-[#168CFF]/15 border border-[#168CFF]/40 text-[#168CFF] flex items-center justify-center shrink-0">
+                      <ShieldCheck className="w-8 h-8" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-mono font-bold tracking-widest text-[#168CFF] uppercase mb-1">FEATURE 03 / 04</span>
+                      <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">High Accuracy</h3>
+                      <p className="text-sm md:text-base text-[#B7C7D9] leading-relaxed font-sans">
+                        Centimeter-level dead reckoning precision for smoother journeys.
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {carouselIdx === 3 && (
+                  <>
+                    <div className="w-16 h-16 rounded-2xl bg-[#7657FF]/15 border border-[#7657FF]/40 text-[#7657FF] flex items-center justify-center shrink-0">
+                      <Globe className="w-8 h-8" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-mono font-bold tracking-widest text-[#7657FF] uppercase mb-1">FEATURE 04 / 04</span>
+                      <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">Global Coverage</h3>
+                      <p className="text-sm md:text-base text-[#B7C7D9] leading-relaxed font-sans">
+                        Navigate anywhere on Earth, even deep inside tunnels & urban canyons.
+                      </p>
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Previous Arrow Button */}
+            <button
+              onClick={() => setCarouselIdx((prev) => (prev === 0 ? 3 : prev - 1))}
+              className="absolute -left-4 sm:-left-14 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-[#020B18]/90 border border-white/20 text-white flex items-center justify-center shadow-xl hover:border-[#00D9FF] hover:text-[#00D9FF] hover:scale-110 active:scale-95 transition-all cursor-pointer z-10"
+              aria-label="Previous Feature"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+
+            {/* Next Arrow Button */}
+            <button
+              onClick={() => setCarouselIdx((prev) => (prev === 3 ? 0 : prev + 1))}
+              className="absolute -right-4 sm:-right-14 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-[#020B18]/90 border border-white/20 text-white flex items-center justify-center shadow-xl hover:border-[#00D9FF] hover:text-[#00D9FF] hover:scale-110 active:scale-95 transition-all cursor-pointer z-10"
+              aria-label="Next Feature"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
           </div>
 
-          <div className="bg-[#041B2D]/80 border border-[#168CFF]/25 rounded-2xl p-6 shadow-[0_0_25px_rgba(22,140,255,0.15)] hover:border-[#168CFF]/60 hover:scale-105 transition-all">
-            <div className="w-12 h-12 rounded-xl bg-[#168CFF]/15 border border-[#168CFF]/40 flex items-center justify-center text-[#168CFF] mb-4">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2">High Accuracy</h3>
-            <p className="text-xs text-[#B7C7D9] leading-relaxed">
-              Centimeter-level dead reckoning precision for smoother journeys.
-            </p>
-          </div>
-
-          <div className="bg-[#041B2D]/80 border border-[#7657FF]/25 rounded-2xl p-6 shadow-[0_0_25px_rgba(118,87,255,0.15)] hover:border-[#7657FF]/60 hover:scale-105 transition-all">
-            <div className="w-12 h-12 rounded-xl bg-[#7657FF]/15 border border-[#7657FF]/40 flex items-center justify-center text-[#7657FF] mb-4">
-              <Globe className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2">Global Coverage</h3>
-            <p className="text-xs text-[#B7C7D9] leading-relaxed">
-              Navigate anywhere on Earth, even deep inside tunnels & urban canyons.
-            </p>
+          {/* Indicator Navigation Dots */}
+          <div className="flex items-center gap-3 mt-8">
+            {[0, 1, 2, 3].map((idx) => (
+              <button
+                key={idx}
+                onClick={() => setCarouselIdx(idx)}
+                className={`h-2.5 rounded-full transition-all cursor-pointer ${
+                  idx === carouselIdx ? 'w-8 bg-[#00D9FF] shadow-[0_0_12px_#00D9FF]' : 'w-2.5 bg-white/20 hover:bg-white/40'
+                }`}
+                aria-label={`Go to feature ${idx + 1}`}
+              />
+            ))}
           </div>
 
         </div>
