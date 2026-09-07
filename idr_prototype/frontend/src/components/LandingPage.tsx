@@ -235,7 +235,7 @@ export const LandingPage: React.FC = () => {
                   className="w-full mt-5 py-3.5 px-6 rounded-lg font-bold text-xs sm:text-sm text-black bg-gradient-to-r from-[#00D9FF] via-[#00E6B8] to-[#00D9FF] shadow-[0_0_40px_rgba(0,217,255,0.8)] flex items-center justify-center gap-2.5 hover:scale-[1.03] active:scale-[0.98] transition-all cursor-pointer group"
                 >
                   <Globe className="w-4.5 h-4.5 text-black group-hover:rotate-45 transition-transform" />
-                  <span className="tracking-wider uppercase font-mono font-bold">INITIALIZE 3D GLOBE →</span>
+                  <span className="tracking-wider uppercase font-mono font-bold">ENTER NAVISYNC →</span>
                 </button>
 
               </div>
