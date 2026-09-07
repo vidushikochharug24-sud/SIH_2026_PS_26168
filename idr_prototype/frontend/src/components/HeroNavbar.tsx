@@ -29,14 +29,14 @@ export const HeroNavbar: React.FC<HeroNavbarProps> = ({
           setStoreView('landing');
           if (onScrollToSection) onScrollToSection('hero');
         }}
-        className="flex items-center gap-3 cursor-pointer select-none group"
+        className="flex items-center gap-4 cursor-pointer select-none group"
       >
         <img
           src="/navisync_logo.png"
           alt="NaviSync Logo"
-          className="h-8 sm:h-9 w-auto object-contain drop-shadow-[0_0_15px_rgba(0,217,255,0.7)] group-hover:scale-105 transition-transform"
+          className="h-10 sm:h-12 md:h-13 w-auto object-contain drop-shadow-[0_0_20px_rgba(0,217,255,0.8)] group-hover:scale-105 transition-transform"
         />
-        <span className="text-[9px] font-mono tracking-[0.2em] text-[#B7C7D9] uppercase font-semibold border-l border-white/20 pl-3 py-0.5">
+        <span className="text-xs sm:text-sm font-mono tracking-[0.2em] text-[#B7C7D9] uppercase font-bold border-l-2 border-[#00D9FF]/40 pl-4 py-1">
           ISRO SIH 2026 · PS 26168
         </span>
       </div>

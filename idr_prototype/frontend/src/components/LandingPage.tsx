@@ -152,15 +152,15 @@ export const LandingPage: React.FC = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute top-5 left-6 md:left-10 z-40 flex items-center gap-3 select-none pointer-events-auto cursor-pointer"
+            className="absolute top-5 left-6 md:left-10 z-40 flex items-center gap-4 select-none pointer-events-auto cursor-pointer"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
             <img
               src="/navisync_logo.png"
               alt="NaviSync Logo"
-              className="h-8 sm:h-9 w-auto object-contain drop-shadow-[0_0_15px_rgba(0,217,255,0.7)]"
+              className="h-10 sm:h-12 md:h-13 w-auto object-contain drop-shadow-[0_0_20px_rgba(0,217,255,0.8)]"
             />
-            <span className="text-[9px] font-mono tracking-[0.2em] text-[#B7C7D9] uppercase font-semibold border-l border-white/20 pl-3 py-0.5">
+            <span className="text-xs sm:text-sm font-mono tracking-[0.2em] text-[#B7C7D9] uppercase font-bold border-l-2 border-[#00D9FF]/40 pl-4 py-1">
               ISRO SIH 2026 · PS 26168
             </span>
           </motion.div>
