@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Cpu, Activity, Gauge, Compass, Layers, ShieldCheck, MapPin, CheckCircle } from 'lucide-react';
+import { Pipeline3DBackground } from './Pipeline3DBackground';
 
 const pipelineNodes = [
   { step: '01', title: 'Smartphone IMU & GNSS', icon: Cpu, desc: 'Captures raw 3-axis accel, gyro rate, & intermittent GPS fixes.', tag: 'INPUT STREAM' },
@@ -15,76 +16,106 @@ const pipelineNodes = [
 
 export const EnginePipelineSection: React.FC = () => {
   return (
-    <section className="py-24 px-4 max-w-5xl mx-auto font-sans relative">
+    <section className="relative py-28 px-6 md:px-12 bg-[#020B18] border-b border-white/10 overflow-hidden font-sans">
       
-      {/* Section Header */}
-      <div className="text-center mb-16">
-        <span className="text-xs font-semibold text-[#00E5FF] uppercase tracking-wider block mb-2 font-mono">
-          Continuous Engine Architecture
-        </span>
-        <h2 className="font-display italic text-3xl md:text-5xl font-normal text-white tracking-tight leading-tight drop-shadow-[0_0_25px_rgba(0,229,255,0.3)]">
-          Continuous Spatial Journey Through the IDR Engine
-        </h2>
-        <p className="text-slate-400 text-sm max-w-xl mx-auto mt-2 leading-relaxed">
-          Follow the trajectory line as raw smartphone motion sensors travel through all 8 spatial processing stages.
-        </p>
+      {/* ── 3D CANVASES & AMBIENT NEON GRID BACKGROUND ── */}
+      <Pipeline3DBackground />
+
+      <div className="absolute inset-0 pointer-events-none z-0">
+        {/* Glowing Cyan & Teal Radial Spotlights */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[500px] bg-gradient-to-tr from-[#00D9FF]/15 via-[#00E6B8]/10 to-transparent blur-[140px] rounded-full" />
+        <div className="absolute bottom-20 left-10 w-[500px] h-[400px] bg-[#168CFF]/10 blur-[130px] rounded-full" />
+        <div className="absolute top-20 right-10 w-[450px] h-[350px] bg-[#7657FF]/10 blur-[120px] rounded-full" />
+
+        {/* High-Tech Blueprint Cyber Grid Pattern */}
+        <div 
+          className="absolute inset-0 opacity-25"
+          style={{
+            backgroundImage: `radial-gradient(#00D9FF 1px, transparent 1px), linear-gradient(to right, rgba(0, 217, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 217, 255, 0.05) 1px, transparent 1px)`,
+            backgroundSize: `24px 24px, 48px 48px, 48px 48px`
+          }}
+        />
+        
+        {/* Soft Vignette Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#020B18] via-transparent to-[#020B18]" />
       </div>
 
-      {/* Spatial Trajectory Timeline Journey Container */}
-      <div className="relative">
+      <div className="relative z-10 max-w-5xl mx-auto">
         
-        {/* Central Connecting Trajectory Beam Line */}
-        <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-gradient-to-b from-[#3b82f6] via-[#00E5FF] to-[#2EE6A6] opacity-40 shadow-[0_0_15px_#00E5FF] hidden md:block" />
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <span className="text-xs font-bold text-[#00D9FF] uppercase tracking-widest block mb-2 font-mono drop-shadow-[0_0_10px_rgba(0,217,255,0.5)]">
+            Continuous Engine Architecture
+          </span>
+          <h2 className="font-display italic text-3xl md:text-5xl font-normal text-white tracking-tight leading-tight drop-shadow-[0_0_35px_rgba(0,217,255,0.4)]">
+            Continuous Spatial Journey Through the IDR Engine
+          </h2>
+          <p className="text-[#B7C7D9] text-sm max-w-xl mx-auto mt-3 leading-relaxed font-sans">
+            Follow the trajectory line as raw smartphone motion sensors travel through all 8 spatial processing stages.
+          </p>
+        </div>
 
-        <div className="space-y-12">
-          {pipelineNodes.map((node, i) => {
-            const IconComp = node.icon;
-            const isEven = i % 2 === 0;
+        {/* Spatial Trajectory Timeline Journey Container */}
+        <div className="relative">
+          
+          {/* Central Connecting Trajectory Beam Line */}
+          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-gradient-to-b from-[#168CFF] via-[#00D9FF] to-[#00E6B8] opacity-60 shadow-[0_0_20px_#00D9FF] hidden md:block" />
 
-            return (
-              <motion.div
-                key={node.step}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: i * 0.05 }}
-                viewport={{ once: true }}
-                className={`relative flex flex-col md:flex-row items-center ${
-                  isEven ? 'md:flex-row-reverse' : ''
-                }`}
-              >
-                
-                {/* Node Card Content */}
-                <div className="w-full md:w-1/2 p-4">
-                  <div className="bg-[#0c0f19]/90 border border-white/10 p-6 rounded-2xl relative overflow-hidden shadow-xl hover:border-[#00E5FF]/40 transition-all hover:shadow-[0_0_30px_rgba(0,229,255,0.15)]">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="font-mono text-xs text-slate-500 font-bold">STAGE {node.step}</span>
-                      <span className="text-[9px] font-mono text-[#00E5FF] bg-[#00E5FF]/10 px-2 py-0.5 rounded border border-[#00E5FF]/20">
-                        {node.tag}
-                      </span>
-                    </div>
+          <div className="space-y-12">
+            {pipelineNodes.map((node, i) => {
+              const IconComp = node.icon;
+              const isEven = i % 2 === 0;
 
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2 rounded-xl bg-slate-900 border border-white/10 text-[#00E5FF] shrink-0">
-                        <IconComp className="w-5 h-5" />
+              return (
+                <motion.div
+                  key={node.step}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.05 }}
+                  viewport={{ once: true }}
+                  className={`relative flex flex-col md:flex-row items-center ${
+                    isEven ? 'md:flex-row-reverse' : ''
+                  }`}
+                >
+                  
+                  {/* Node Card Content */}
+                  <div className="w-full md:w-1/2 p-3">
+                    <div className="bg-[#041B2D]/85 border border-[#00D9FF]/25 p-6 rounded-2xl relative overflow-hidden backdrop-blur-xl shadow-[0_0_30px_rgba(0,217,255,0.1)] hover:border-[#00D9FF]/60 transition-all hover:shadow-[0_0_45px_rgba(0,217,255,0.25)] hover:scale-[1.02]">
+                      
+                      {/* Top Cyber Accent Corner Line */}
+                      <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-[#00D9FF]/20 to-transparent pointer-events-none" />
+
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-mono text-xs text-[#00D9FF] font-bold tracking-wider">STAGE {node.step}</span>
+                        <span className="text-[9px] font-mono text-[#00E6B8] bg-[#00E6B8]/15 px-2.5 py-0.5 rounded-full border border-[#00E6B8]/30 font-semibold tracking-wider">
+                          {node.tag}
+                        </span>
                       </div>
-                      <h3 className="text-base font-bold text-white font-sans">{node.title}</h3>
+
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="p-2.5 rounded-xl bg-[#031426] border border-[#00D9FF]/30 text-[#00D9FF] shrink-0 shadow-[0_0_15px_rgba(0,217,255,0.3)]">
+                          <IconComp className="w-5 h-5" />
+                        </div>
+                        <h3 className="text-base font-bold text-white font-sans">{node.title}</h3>
+                      </div>
+
+                      <p className="text-xs text-[#B7C7D9] leading-relaxed font-sans">{node.desc}</p>
                     </div>
-
-                    <p className="text-xs text-slate-400 leading-relaxed font-sans">{node.desc}</p>
                   </div>
-                </div>
 
-                {/* Central Trajectory Node Point */}
-                <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#050711] border-2 border-[#00E5FF] flex items-center justify-center shadow-[0_0_15px_#00E5FF] z-10 hidden md:flex">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#2EE6A6] animate-pulse" />
-                </div>
+                  {/* Central Trajectory Node Point */}
+                  <div className="absolute left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-[#020B18] border-2 border-[#00D9FF] flex items-center justify-center shadow-[0_0_20px_#00D9FF] z-10 hidden md:flex">
+                    <div className="w-3 h-3 rounded-full bg-[#00E6B8] animate-pulse shadow-[0_0_8px_#00E6B8]" />
+                  </div>
 
-                {/* Spacer for 50% split */}
-                <div className="w-full md:w-1/2 hidden md:block" />
+                  {/* Spacer for 50% split */}
+                  <div className="w-full md:w-1/2 hidden md:block" />
 
-              </motion.div>
-            );
-          })}
+                </motion.div>
+              );
+            })}
+          </div>
+
         </div>
 
       </div>
