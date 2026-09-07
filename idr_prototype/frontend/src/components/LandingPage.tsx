@@ -269,24 +269,17 @@ export const LandingPage: React.FC = () => {
                   Continuous vehicle navigation when GNSS signals disappear. Drag globe left/right to explore.
                 </p>
 
-                {/* CTA & Scroll Indicator */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                  <button
-                    onClick={handleLaunchTransition}
-                    className="py-4 px-8 rounded-full font-bold text-sm text-white bg-gradient-to-r from-[#00D9FF] via-[#168CFF] to-[#7657FF] shadow-[0_0_35px_rgba(0,217,255,0.5)] flex items-center justify-center gap-3 cursor-pointer hover:scale-105 hover:shadow-[0_0_50px_rgba(0,217,255,0.8)] transition-all group"
-                  >
-                    <span>Launch Navigation Engine</span>
-                    <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
-                  </button>
-
+                {/* Scroll Indicator Prompt (Navigation Button Removed) */}
+                <div className="flex items-center gap-3 pt-2">
                   <div
                     onClick={handleLaunchTransition}
-                    className="flex items-center gap-3 text-slate-400 text-xs font-mono tracking-widest uppercase cursor-pointer hover:text-[#00D9FF] transition-colors group py-2"
+                    className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-[#031426]/75 backdrop-blur-md border border-[#00D9FF]/30 text-slate-300 text-xs font-mono tracking-widest uppercase cursor-pointer hover:text-[#00D9FF] hover:border-[#00D9FF]/70 hover:shadow-[0_0_20px_rgba(0,217,255,0.3)] transition-all group"
                   >
                     <span>SCROLL DOWN TO ENTER STREETVIEW TUNNEL</span>
                     <ArrowDown className="w-4 h-4 text-[#00D9FF] animate-bounce" />
                   </div>
                 </div>
+
               </motion.div>
             )}
           </AnimatePresence>
