@@ -33,6 +33,7 @@ export const LandingPage: React.FC = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState('hero');
   const finalVideoRef = useRef<HTMLVideoElement | null>(null);
+  const videoEndedRef = useRef(false);
 
   // Feature Cards Carousel State
   const [carouselIdx, setCarouselIdx] = useState(0);
@@ -44,31 +45,53 @@ export const LandingPage: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // 1. MP4 Hero Video Auto-Play & Pause on Signal Acquired Frame
+  // 1. MP4 Hero Video Auto-Play, Unmuted Sound & Smooth Handoff
   useEffect(() => {
     const video = finalVideoRef.current;
     if (!video) return;
 
     if (landingState === 'INTRO_VIDEO') {
+      videoEndedRef.current = false;
       video.currentTime = 0;
-      video.play().catch(err => console.warn('Hero video autoplay fallback:', err));
+      video.muted = false;
+      video.volume = 1.0;
+
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn('Autoplay with audio blocked by browser policy, falling back to muted with click-to-unmute listener:', err);
+          video.muted = true;
+          video.play().catch(() => {});
+
+          const unmute = () => {
+            if (finalVideoRef.current) {
+              finalVideoRef.current.muted = false;
+              finalVideoRef.current.volume = 1.0;
+            }
+            window.removeEventListener('click', unmute);
+            window.removeEventListener('touchstart', unmute);
+          };
+          window.addEventListener('click', unmute);
+          window.addEventListener('touchstart', unmute);
+        });
+      }
     }
 
     const handleTimeUpdate = () => {
-      // Pause video when it reaches the Satellite Signal Acquired frame
-      if (video.duration && video.currentTime >= video.duration - 0.4) {
-        if (landingState === 'INTRO_VIDEO') {
-          video.pause();
-          setLandingState('SIGNAL_ACHIEVED');
-        }
+      if (videoEndedRef.current) return;
+      // Smoothly transition to Satellite Signal Acquired state when video reaches end frame
+      if (video.duration && video.currentTime >= video.duration - 0.25) {
+        videoEndedRef.current = true;
+        if (!video.paused) video.pause();
+        setLandingState('SIGNAL_ACHIEVED');
       }
     };
 
     const handleEnded = () => {
-      if (landingState === 'INTRO_VIDEO') {
-        video.pause();
-        setLandingState('SIGNAL_ACHIEVED');
-      }
+      if (videoEndedRef.current) return;
+      videoEndedRef.current = true;
+      if (!video.paused) video.pause();
+      setLandingState('SIGNAL_ACHIEVED');
     };
 
     video.addEventListener('timeupdate', handleTimeUpdate);
@@ -187,10 +210,10 @@ export const LandingPage: React.FC = () => {
         }`}>
           <video
             ref={finalVideoRef}
-            muted
             playsInline
             preload="auto"
-            className="w-full h-full object-cover object-center filter brightness-95 contrast-105"
+            style={{ transform: 'translateZ(0)', willChange: 'transform' }}
+            className="w-full h-full object-cover object-center"
           >
             <source src="/final.mp4" type="video/mp4" />
           </video>
