@@ -402,7 +402,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Carousel Interactive Card Frame */}
-          <div className="relative w-full max-w-2xl flex items-center justify-center">
+          <div className="relative w-full max-w-xl flex items-center justify-center">
             
             <AnimatePresence mode="wait">
               <motion.div
@@ -411,7 +411,7 @@ export const LandingPage: React.FC = () => {
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: -40, scale: 0.95 }}
                 transition={{ duration: 0.35, ease: 'easeOut' }}
-                className={`w-full bg-[#041B2D]/90 border rounded-3xl p-8 md:p-10 ${
+                className={`w-full bg-[#041B2D]/90 border rounded-3xl p-6 md:p-7 ${
                   carouselIdx === 0
                     ? 'border-[#00D9FF]/60 shadow-[0_0_40px_rgba(0,217,255,0.3)]'
                     : carouselIdx === 1
@@ -419,7 +419,7 @@ export const LandingPage: React.FC = () => {
                     : carouselIdx === 2
                     ? 'border-[#168CFF]/60 shadow-[0_0_40px_rgba(22,140,255,0.3)]'
                     : 'border-[#7657FF]/60 shadow-[0_0_40px_rgba(118,87,255,0.3)]'
-                } backdrop-blur-xl flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left`}
+                } backdrop-blur-xl flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left`}
               >
                 {carouselIdx === 0 && (
                   <>
