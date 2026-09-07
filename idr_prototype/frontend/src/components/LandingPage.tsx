@@ -16,30 +16,24 @@ import { ResultsBenchmarkSection } from './ResultsBenchmarkSection';
 import { EdgeArchitectureSection } from './EdgeArchitectureSection';
 
 export type LandingState = 
-  | 'INTRO_VIDEO'       // MP4 /final.mp4 hero sequence playing
-  | 'EARTH_HANDOFF'     // Cross-fading MP4 to live 3D Earth
-  | 'INTERACTIVE_EARTH' // Live Three.js 3D Earth & Satellite active
-  | 'STREET_TRANSITION' // Camera zooming down into Earth surface
-  | 'STREET_VIEW';      // Descended into 3D Street View page experience
+  | 'INTRO_VIDEO'       // 1. Pure video playback (no text/UI overlay)
+  | 'SIGNAL_ACHIEVED'   // 2. Video completed -> "Satellite Signal Acquired" prompt
+  | 'EARTH_ACTIVE'      // 3. Clicked prompt -> 3D Half-Earth active & rotatable left/right
+  | 'STREET_TRANSITION' // 4 -> 5 Transition to Street View
+  | 'STREET_VIEW';      // 5. Descended into 3D Street View experience
 
 export const LandingPage: React.FC = () => {
   const setStoreView = useReplayStore((s) => s.setStoreView);
   
   // Cinematic State Machine
   const [landingState, setLandingState] = useState<LandingState>('INTRO_VIDEO');
-  const [videoTime, setVideoTime] = useState(0);
+  const [heroTextVisible, setHeroTextVisible] = useState(false);
   const [earthHovered, setEarthHovered] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState('hero');
   const finalVideoRef = useRef<HTMLVideoElement | null>(null);
 
-  // Timed HTML Text Sync (over MP4 video)
-  const showBadge = videoTime >= 0.5 || landingState !== 'INTRO_VIDEO';
-  const showHeading = videoTime >= 1.0 || landingState !== 'INTRO_VIDEO';
-  const showSubtitle = videoTime >= 1.5 || landingState !== 'INTRO_VIDEO';
-  const showCTA = videoTime >= 2.0 || landingState !== 'INTRO_VIDEO';
-
-  // 1. MP4 Hero Video Auto-Play & Handoff Timer
+  // 1. MP4 Hero Video Auto-Play & Completion Handoff
   useEffect(() => {
     const video = finalVideoRef.current;
     if (!video) return;
@@ -48,20 +42,17 @@ export const LandingPage: React.FC = () => {
     video.play().catch(err => console.warn('Hero video autoplay fallback:', err));
 
     const handleTimeUpdate = () => {
-      setVideoTime(video.currentTime);
-      // Handoff to Live 3D Earth when video nears completion
-      if (video.duration && video.currentTime >= video.duration - 0.4) {
+      // Handoff to Signal Achieved state when video nears completion
+      if (video.duration && video.currentTime >= video.duration - 0.3) {
         if (landingState === 'INTRO_VIDEO') {
-          setLandingState('EARTH_HANDOFF');
-          setTimeout(() => setLandingState('INTERACTIVE_EARTH'), 400);
+          setLandingState('SIGNAL_ACHIEVED');
         }
       }
     };
 
     const handleEnded = () => {
       if (landingState === 'INTRO_VIDEO') {
-        setLandingState('EARTH_HANDOFF');
-        setTimeout(() => setLandingState('INTERACTIVE_EARTH'), 400);
+        setLandingState('SIGNAL_ACHIEVED');
       }
     };
 
@@ -74,7 +65,16 @@ export const LandingPage: React.FC = () => {
     };
   }, [landingState]);
 
-  // 2. Scroll Progress & Street View Section Activation
+  // 2. Click Prompt Handler -> Reveal 3D Earth, then fade in Hero Text
+  const handleSignalClick = () => {
+    if (landingState !== 'SIGNAL_ACHIEVED') return;
+    setLandingState('EARTH_ACTIVE');
+    setTimeout(() => {
+      setHeroTextVisible(true);
+    }, 400);
+  };
+
+  // 3. Scroll Progress & Street View Section Activation
   useEffect(() => {
     const handleScroll = () => {
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -82,7 +82,7 @@ export const LandingPage: React.FC = () => {
       const progress = totalHeight > 0 ? currentScroll / totalHeight : 0;
       setScrollProgress(progress);
 
-      if (currentScroll > 400 && landingState !== 'STREET_VIEW' && landingState !== 'STREET_TRANSITION') {
+      if (currentScroll > 350 && landingState !== 'STREET_VIEW' && landingState !== 'STREET_TRANSITION') {
         setLandingState('STREET_VIEW');
       }
 
@@ -130,9 +130,9 @@ export const LandingPage: React.FC = () => {
       {/* ── 1. HERO SECTION CONTAINER (PHONE → ROUTE → LIVE 3D EARTH) ── */}
       <section id="hero" className="relative w-full h-screen min-h-[720px] flex flex-col justify-between pt-20 overflow-hidden bg-[#020B18]">
         
-        {/* Background MP4 Intro Video Layer (Phone → Route → Planetary Horizon) */}
+        {/* Background MP4 Intro Video Layer (Phone → Route → Earth) */}
         <div className={`absolute inset-0 transition-opacity duration-700 pointer-events-none z-0 ${
-          landingState === 'INTRO_VIDEO' || landingState === 'EARTH_HANDOFF' ? 'opacity-100' : 'opacity-0'
+          landingState === 'INTRO_VIDEO' || landingState === 'SIGNAL_ACHIEVED' ? 'opacity-100' : 'opacity-0'
         }`}>
           <video
             ref={finalVideoRef}
@@ -143,13 +143,13 @@ export const LandingPage: React.FC = () => {
           >
             <source src="/final.mp4" type="video/mp4" />
           </video>
-          {/* Subtle Prussian Blue Vignette Overlay */}
+          {/* Dark Vignette Overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#020B18]/70 via-transparent to-[#020B18]/90 pointer-events-none" />
         </div>
 
-        {/* Live Three.js Interactive 3D Earth Canvas Layer */}
+        {/* Live Three.js Interactive 3D Earth Canvas Layer (Half-Earth at bottom, drag rotatable) */}
         <div className={`absolute inset-0 transition-opacity duration-700 z-0 ${
-          landingState === 'EARTH_HANDOFF' || landingState === 'INTERACTIVE_EARTH' || landingState === 'STREET_TRANSITION'
+          landingState === 'EARTH_ACTIVE' || landingState === 'STREET_TRANSITION'
             ? 'opacity-100 pointer-events-auto'
             : 'opacity-0 pointer-events-none'
         }`}>
@@ -161,78 +161,78 @@ export const LandingPage: React.FC = () => {
           />
         </div>
 
-        {/* ── 2. HERO HTML OVERLAY (SYNCED WITH VIDEO / EARTH) ── */}
+        {/* ── 2. STEP 2 OVERLAY: SATELLITE SIGNAL ACQUIRED CLICK PROMPT ── */}
+        <AnimatePresence>
+          {landingState === 'SIGNAL_ACHIEVED' && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={handleSignalClick}
+              className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#020B18]/75 backdrop-blur-md cursor-pointer px-4 text-center"
+            >
+              <div className="inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-[#031426]/90 border border-[#00E6B8] text-[#00E6B8] text-sm font-mono font-bold tracking-widest uppercase mb-6 shadow-[0_0_35px_rgba(0,230,184,0.5)] animate-pulse">
+                <span className="w-3 h-3 rounded-full bg-[#00E6B8] shadow-[0_0_12px_#00E6B8]" />
+                <span>SATELLITE SIGNAL ACQUIRED</span>
+              </div>
+              <button
+                onClick={handleSignalClick}
+                className="py-4 px-8 rounded-full font-bold text-base text-black bg-gradient-to-r from-[#00D9FF] via-[#00E6B8] to-[#00D9FF] shadow-[0_0_40px_rgba(0,217,255,0.7)] flex items-center gap-3 hover:scale-105 transition-all cursor-pointer"
+              >
+                <span>Click to Initialize 3D Globe & Text →</span>
+                <Globe className="w-5 h-5" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── 3. HERO HTML OVERLAY (APPEARS AFTER 3D EARTH INITIALIZATION) ── */}
         <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 pt-8 sm:pt-12 flex flex-col items-start w-full">
           
-          {/* Synced Badge: 0.5s */}
           <AnimatePresence>
-            {showBadge && (
+            {heroTextVisible && (landingState === 'EARTH_ACTIVE' || landingState === 'STREET_TRANSITION') && (
               <motion.div
-                initial={{ opacity: 0, y: -15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
-                className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#031426]/75 backdrop-blur-md border border-[#00D9FF]/35 shadow-[0_0_20px_rgba(0,217,255,0.25)] text-[#00D9FF] text-xs font-semibold mb-6"
-              >
-                <Zap className="w-4 h-4 text-[#00D9FF] animate-pulse" />
-                <span>AI-ML Based Intelligent Dead Reckoning · SIH 2026</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Synced Main Heading: 1.0s */}
-          <AnimatePresence>
-            {showHeading && (
-              <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, ease: 'easeOut' }}
-                className="font-display italic text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.05] max-w-3xl drop-shadow-[0_0_40px_rgba(0,217,255,0.3)] mb-4"
+                className="flex flex-col items-start"
               >
-                <span className="text-white block">Intelligent</span>
-                <span className="bg-gradient-to-r from-white via-[#00D9FF] to-[#00E6B8] bg-clip-text text-transparent">
-                  Dead Reckoning
-                </span>
-              </motion.h1>
-            )}
-          </AnimatePresence>
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#031426]/85 backdrop-blur-md border border-[#00D9FF]/35 shadow-[0_0_20px_rgba(0,217,255,0.25)] text-[#00D9FF] text-xs font-semibold mb-6">
+                  <Zap className="w-4 h-4 text-[#00D9FF] animate-pulse" />
+                  <span>AI-ML Based Intelligent Dead Reckoning · SIH 2026</span>
+                </div>
 
-          {/* Synced Subtitle: 1.5s */}
-          <AnimatePresence>
-            {showSubtitle && (
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
-                className="text-base sm:text-lg md:text-xl text-[#B7C7D9] max-w-xl mb-8 font-sans leading-relaxed"
-              >
-                Continuous vehicle navigation when GNSS signals disappear.
-              </motion.p>
-            )}
-          </AnimatePresence>
+                {/* Main Heading */}
+                <h1 className="font-display italic text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.05] max-w-3xl drop-shadow-[0_0_40px_rgba(0,217,255,0.3)] mb-4">
+                  <span className="text-white block">Intelligent</span>
+                  <span className="bg-gradient-to-r from-white via-[#00D9FF] to-[#00E6B8] bg-clip-text text-transparent">
+                    Dead Reckoning
+                  </span>
+                </h1>
 
-          {/* Synced CTA & Scroll Indicator: 2.0s */}
-          <AnimatePresence>
-            {showCTA && (
-              <motion.div
-                initial={{ opacity: 0, y: 25 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
-                className="flex flex-col sm:flex-row items-start sm:items-center gap-6"
-              >
-                <button
-                  onClick={handleLaunchTransition}
-                  className="py-4 px-8 rounded-full font-bold text-sm text-white bg-gradient-to-r from-[#00D9FF] via-[#168CFF] to-[#7657FF] shadow-[0_0_35px_rgba(0,217,255,0.5)] flex items-center justify-center gap-3 cursor-pointer hover:scale-105 hover:shadow-[0_0_50px_rgba(0,217,255,0.8)] transition-all group"
-                >
-                  <span>Launch Navigation Engine</span>
-                  <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
-                </button>
+                {/* Subtitle */}
+                <p className="text-base sm:text-lg md:text-xl text-[#B7C7D9] max-w-xl mb-8 font-sans leading-relaxed">
+                  Continuous vehicle navigation when GNSS signals disappear. Drag globe left/right to explore.
+                </p>
 
-                <div
-                  onClick={handleLaunchTransition}
-                  className="flex items-center gap-3 text-slate-400 text-xs font-mono tracking-widest uppercase cursor-pointer hover:text-[#00D9FF] transition-colors group py-2"
-                >
-                  <span>SCROLL TO ENTER STREETVIEW TUNNEL</span>
-                  <ArrowDown className="w-4 h-4 text-[#00D9FF] animate-bounce" />
+                {/* CTA & Scroll Indicator */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                  <button
+                    onClick={handleLaunchTransition}
+                    className="py-4 px-8 rounded-full font-bold text-sm text-white bg-gradient-to-r from-[#00D9FF] via-[#168CFF] to-[#7657FF] shadow-[0_0_35px_rgba(0,217,255,0.5)] flex items-center justify-center gap-3 cursor-pointer hover:scale-105 hover:shadow-[0_0_50px_rgba(0,217,255,0.8)] transition-all group"
+                  >
+                    <span>Launch Navigation Engine</span>
+                    <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
+                  </button>
+
+                  <div
+                    onClick={handleLaunchTransition}
+                    className="flex items-center gap-3 text-slate-400 text-xs font-mono tracking-widest uppercase cursor-pointer hover:text-[#00D9FF] transition-colors group py-2"
+                  >
+                    <span>SCROLL DOWN TO ENTER STREETVIEW TUNNEL</span>
+                    <ArrowDown className="w-4 h-4 text-[#00D9FF] animate-bounce" />
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -240,9 +240,9 @@ export const LandingPage: React.FC = () => {
 
         </div>
 
-        {/* ── SATELLITE SIGNAL STATUS CARD (OVER 3D EARTH) ── */}
+        {/* ── SATELLITE SIGNAL STATUS CARD (ACTIVE WITH 3D EARTH) ── */}
         <AnimatePresence>
-          {(landingState === 'INTERACTIVE_EARTH' || landingState === 'EARTH_HANDOFF') && (
+          {(landingState === 'EARTH_ACTIVE') && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -269,17 +269,17 @@ export const LandingPage: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* Earth Hover Exploration Tooltip Prompt */}
+        {/* Earth Hover Drag Prompt */}
         <AnimatePresence>
-          {earthHovered && (
+          {earthHovered && landingState === 'EARTH_ACTIVE' && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               className="absolute left-1/2 -translate-x-1/2 bottom-12 z-20 bg-[#00D9FF] text-black font-bold text-xs px-4 py-2 rounded-full shadow-[0_0_30px_#00D9FF] flex items-center gap-2 pointer-events-none"
             >
-              <span>Explore this location</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <Navigation className="w-3.5 h-3.5" />
+              <span>Drag left or right to rotate globe</span>
             </motion.div>
           )}
         </AnimatePresence>

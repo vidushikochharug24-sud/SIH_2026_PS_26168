@@ -229,14 +229,36 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
     }
     earthGroup.add(pinGroup);
 
-    // 8. Raycaster for Hover & Click
+    // 8. Raycaster for Hover & Click + Manual Left/Right Pointer Drag
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2(-100, -100);
 
-    const handlePointerMove = (e: MouseEvent) => {
+    let isDragging = false;
+    let startX = 0;
+    let targetRotationY = 0;
+    let currentRotationY = 0;
+    let hasDragged = false;
+
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+      isDragging = true;
+      startX = clientX;
+      hasDragged = false;
+
       const rect = container.getBoundingClientRect();
-      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    };
+
+    const handlePointerMove = (e: MouseEvent | TouchEvent) => {
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+      const rect = container.getBoundingClientRect();
+      mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
 
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects([earthMesh, pinMesh]);
@@ -245,27 +267,48 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
       setHovered(isHit);
       if (onHoverStateChange) onHoverStateChange(isHit);
 
-      if (isHit) {
+      if (isDragging) {
+        const deltaX = clientX - startX;
+        if (Math.abs(deltaX) > 3) hasDragged = true;
+        targetRotationY += deltaX * 0.006;
+        startX = clientX;
+        document.body.style.cursor = 'grabbing';
+      } else if (isHit) {
         document.body.style.cursor = 'pointer';
       } else {
         document.body.style.cursor = 'default';
       }
     };
 
-    const handlePointerDown = (e: MouseEvent) => {
-      const rect = container.getBoundingClientRect();
-      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    const handlePointerUp = (e: MouseEvent | TouchEvent) => {
+      if (!isDragging) return;
+      isDragging = false;
+      document.body.style.cursor = 'default';
 
-      raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObjects([earthMesh, pinMesh]);
-      if (intersects.length > 0 && onEarthClick) {
-        onEarthClick();
+      if (!hasDragged && onEarthClick) {
+        // If it was a clean click (not a drag), trigger earth click
+        const rect = container.getBoundingClientRect();
+        const clientX = 'changedTouches' in e ? e.changedTouches[0].clientX : (e as MouseEvent).clientX;
+        const clientY = 'changedTouches' in e ? e.changedTouches[0].clientY : (e as MouseEvent).clientY;
+        mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects([earthMesh, pinMesh]);
+        if (intersects.length > 0) {
+          onEarthClick();
+        }
       }
     };
 
+    const domEl = container;
+    domEl.addEventListener('mousedown', handlePointerDown);
     window.addEventListener('mousemove', handlePointerMove);
-    container.addEventListener('click', handlePointerDown);
+    window.addEventListener('mouseup', handlePointerUp);
+
+    domEl.addEventListener('touchstart', handlePointerDown, { passive: true });
+    window.addEventListener('touchmove', handlePointerMove, { passive: true });
+    window.addEventListener('touchend', handlePointerUp);
 
     // 9. Animation Loop
     let animId: number;
@@ -277,9 +320,13 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
       animId = requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
 
-      // Earth rotation
-      earthMesh.rotation.y = elapsed * 0.08;
-      cloudsMesh.rotation.y = elapsed * 0.11;
+      // Earth rotation: auto spin + smooth drag inertia
+      if (!isDragging) {
+        targetRotationY += 0.0015;
+      }
+      currentRotationY += (targetRotationY - currentRotationY) * 0.12;
+      earthMesh.rotation.y = currentRotationY;
+      cloudsMesh.rotation.y = currentRotationY * 1.15;
 
       // Orbiting Satellite
       satAngle = elapsed * 0.6;
@@ -332,8 +379,12 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
 
     return () => {
       cancelAnimationFrame(animId);
+      domEl.removeEventListener('mousedown', handlePointerDown);
       window.removeEventListener('mousemove', handlePointerMove);
-      container.removeEventListener('click', handlePointerDown);
+      window.removeEventListener('mouseup', handlePointerUp);
+      domEl.removeEventListener('touchstart', handlePointerDown);
+      window.removeEventListener('touchmove', handlePointerMove);
+      window.removeEventListener('touchend', handlePointerUp);
       window.removeEventListener('resize', handleResize);
       document.body.style.cursor = 'default';
       if (container && renderer.domElement) {
@@ -350,5 +401,6 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
     };
   }, [hovered, isZoomingToStreet, onEarthClick, onHoverStateChange, onZoomComplete]);
 
-  return <div ref={containerRef} className="w-full h-full min-h-[480px]" />;
+  return <div ref={containerRef} className="w-full h-full min-h-[480px] cursor-grab active:cursor-grabbing" />;
 };
+
