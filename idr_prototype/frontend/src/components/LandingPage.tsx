@@ -172,10 +172,10 @@ export const LandingPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="absolute right-[7%] md:right-[12%] top-[28%] md:top-[33%] z-30 flex flex-col items-end"
+              className="absolute right-[5%] md:right-[10%] top-[28%] md:top-[33%] z-30 flex flex-col items-end"
             >
               {/* Cyber HUD Card aligned exactly on top of video HUD card */}
-              <div className="relative bg-[#020B18]/95 backdrop-blur-2xl border border-[#00D9FF]/70 rounded-xl p-6 shadow-[0_0_60px_rgba(0,217,255,0.5)] w-[340px] sm:w-[420px]">
+              <div className="relative bg-[#020B18]/95 backdrop-blur-2xl border border-[#00D9FF]/70 rounded-xl p-6 shadow-[0_0_60px_rgba(0,217,255,0.5)] w-[360px] sm:w-[475px]">
                 
                 {/* Cyber Corner Brackets */}
                 <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-[#00D9FF]" />
