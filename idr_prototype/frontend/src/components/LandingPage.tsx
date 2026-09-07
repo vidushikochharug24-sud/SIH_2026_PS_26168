@@ -145,6 +145,28 @@ export const LandingPage: React.FC = () => {
         )}
       </AnimatePresence>
 
+      {/* ── TOP LEFT FLOATING BRAND LOGO OVER VIDEO ── */}
+      <AnimatePresence>
+        {(landingState === 'INTRO_VIDEO' || landingState === 'SIGNAL_ACHIEVED') && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute top-5 left-6 md:left-10 z-40 flex items-center gap-3 select-none pointer-events-auto cursor-pointer"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+            <img
+              src="/navisync_logo.png"
+              alt="NaviSync Logo"
+              className="h-8 sm:h-9 w-auto object-contain drop-shadow-[0_0_15px_rgba(0,217,255,0.7)]"
+            />
+            <span className="text-[9px] font-mono tracking-[0.2em] text-[#B7C7D9] uppercase font-semibold border-l border-white/20 pl-3 py-0.5">
+              ISRO SIH 2026 · PS 26168
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── 1. HERO SECTION CONTAINER (PHONE → ROUTE → LIVE 3D EARTH) ── */}
       <section id="hero" className="relative w-full h-screen min-h-[720px] flex flex-col justify-between pt-20 overflow-hidden bg-[#020B18]">
         

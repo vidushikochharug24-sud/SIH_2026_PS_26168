@@ -31,23 +31,14 @@ export const HeroNavbar: React.FC<HeroNavbarProps> = ({
         }}
         className="flex items-center gap-3 cursor-pointer select-none group"
       >
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-[#00D9FF]/40 bg-[#031426] shadow-[0_0_20px_rgba(0,217,255,0.3)] flex-shrink-0 group-hover:scale-105 transition-transform flex items-center justify-center p-0.5">
-          <img src="/navisync_logo.png" alt="NaviSync Satellite Logo" className="w-full h-full object-contain" />
-        </div>
-        <div className="flex flex-col">
-          <div className="relative inline-flex items-center font-black italic tracking-tighter text-xl sm:text-2xl leading-none pr-5 drop-shadow-[0_0_15px_rgba(0,217,255,0.7)]">
-            <span className="text-white">Navi</span>
-            <span className="bg-gradient-to-r from-[#00D9FF] via-[#00E6B8] to-[#168CFF] bg-clip-text text-transparent">Sync</span>
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 pointer-events-none opacity-90">
-              <span className="w-3 h-[1.5px] bg-[#00E6B8] rounded-full shadow-[0_0_4px_#00E6B8]" />
-              <span className="w-4.5 h-[1.5px] bg-[#00D9FF] rounded-full shadow-[0_0_4px_#00D9FF]" />
-              <span className="w-2 h-[1.5px] bg-[#168CFF] rounded-full shadow-[0_0_4px_#168CFF]" />
-            </div>
-          </div>
-          <span className="text-[9px] font-mono tracking-[0.2em] text-[#B7C7D9] uppercase font-semibold mt-0.5">
-            ISRO SIH 2026 · PS 26168
-          </span>
-        </div>
+        <img
+          src="/navisync_logo.png"
+          alt="NaviSync Logo"
+          className="h-8 sm:h-9 w-auto object-contain drop-shadow-[0_0_15px_rgba(0,217,255,0.7)] group-hover:scale-105 transition-transform"
+        />
+        <span className="text-[9px] font-mono tracking-[0.2em] text-[#B7C7D9] uppercase font-semibold border-l border-white/20 pl-3 py-0.5">
+          ISRO SIH 2026 · PS 26168
+        </span>
       </div>
 
       {/* ── CENTER: NAVIGATION LINKS ── */}
