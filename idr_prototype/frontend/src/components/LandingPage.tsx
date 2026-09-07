@@ -86,16 +86,23 @@ export const LandingPage: React.FC = () => {
       const progress = totalHeight > 0 ? currentScroll / totalHeight : 0;
       setScrollProgress(progress);
 
-      if (currentScroll > 350 && landingState !== 'STREET_VIEW' && landingState !== 'STREET_TRANSITION') {
-        setLandingState('STREET_VIEW');
+      if (currentScroll < 350) {
+        setActiveSection('hero');
+        // Restore 3D Earth scene and hero text whenever returning to top
+        if (landingState === 'STREET_VIEW' || landingState === 'STREET_TRANSITION') {
+          setLandingState('EARTH_ACTIVE');
+          setHeroTextVisible(true);
+        }
+      } else {
+        if (currentScroll > 350 && landingState === 'EARTH_ACTIVE') {
+          setLandingState('STREET_VIEW');
+        }
+        if (currentScroll < 1200) setActiveSection('blackout');
+        else if (currentScroll < 2000) setActiveSection('pipeline');
+        else if (currentScroll < 2800) setActiveSection('dr');
+        else if (currentScroll < 3600) setActiveSection('restore');
+        else setActiveSection('cockpit');
       }
-
-      if (currentScroll < 500) setActiveSection('hero');
-      else if (currentScroll < 1200) setActiveSection('blackout');
-      else if (currentScroll < 2000) setActiveSection('pipeline');
-      else if (currentScroll < 2800) setActiveSection('dr');
-      else if (currentScroll < 3600) setActiveSection('restore');
-      else setActiveSection('cockpit');
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -115,8 +122,11 @@ export const LandingPage: React.FC = () => {
   };
 
   const scrollToSection = (id: string) => {
-    if (id === 'hero') window.scrollTo({ top: 0, behavior: 'smooth' });
-    else {
+    if (id === 'hero') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setLandingState('EARTH_ACTIVE');
+      setHeroTextVisible(true);
+    } else {
       const el = document.getElementById(id);
       if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
@@ -153,7 +163,7 @@ export const LandingPage: React.FC = () => {
 
         {/* Live Three.js Interactive 3D Earth Canvas Layer (Half-Earth at bottom, drag rotatable) */}
         <div className={`absolute inset-0 transition-opacity duration-700 z-0 ${
-          landingState === 'EARTH_ACTIVE' || landingState === 'STREET_TRANSITION'
+          landingState === 'EARTH_ACTIVE' || landingState === 'STREET_TRANSITION' || landingState === 'STREET_VIEW'
             ? 'opacity-100 pointer-events-auto'
             : 'opacity-0 pointer-events-none'
         }`}>

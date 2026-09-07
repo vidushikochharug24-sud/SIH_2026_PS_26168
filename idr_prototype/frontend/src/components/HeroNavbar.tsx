@@ -24,7 +24,10 @@ export const HeroNavbar: React.FC<HeroNavbarProps> = ({
     >
       {/* ── LEFT: NAVISYNC BRAND LOGO ── */}
       <div
-        onClick={() => setStoreView('landing')}
+        onClick={() => {
+          setStoreView('landing');
+          if (onScrollToSection) onScrollToSection('hero');
+        }}
         className="flex items-center gap-3 cursor-pointer select-none group"
       >
         <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-[#00D9FF]/40 bg-[#031426] shadow-[0_0_20px_rgba(0,217,255,0.3)] flex-shrink-0 group-hover:scale-105 transition-transform flex items-center justify-center p-0.5">
