@@ -22,6 +22,7 @@
   - Palak Sachdeva ([@palaksachdeva](https://github.com/palaksachdeva))
   - Utkarsh Kumar ([@Falsistic](https://github.com/Falsistic))
   - Rahul Gupta ([@rahul01gupta11](https://github.com/rahul01gupta11))
+  - Chirayu Aggarwal ([@kayFj1](https://github.com/kayFj1))
 
 ---
 
