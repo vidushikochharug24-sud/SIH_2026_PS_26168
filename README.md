@@ -1,5 +1,5 @@
 # NAVISYNC — AI-ML Based Intelligent Dead Reckoning System
-
+## Live Deployed Website: https://sih-2026-ps-26168.vercel.app/
 > **When GNSS disappears, NAVISYNC keeps you moving.**
 
 ---
