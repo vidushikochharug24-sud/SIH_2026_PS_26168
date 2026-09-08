@@ -8,8 +8,9 @@ export const Pipeline3DBackground: React.FC = () => {
     const container = containerRef.current;
     if (!container) return;
 
-    const width = container.clientWidth || window.innerWidth;
-    const height = container.clientHeight || 800;
+    // Viewport-based dimensions (1080p instead of 8000px height to prevent GPU buffer overload)
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
@@ -17,11 +18,11 @@ export const Pipeline3DBackground: React.FC = () => {
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Cap pixel ratio to 1.5 for ultra-smooth performance
     container.appendChild(renderer.domElement);
 
-    // 1. 3D Particle Cloud / Spatial Constellation Grid (Spans full page scroll depth)
-    const particleCount = 1200;
+    // 1. 3D Particle Cloud / Spatial Constellation Grid
+    const particleCount = 700;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
@@ -32,7 +33,7 @@ export const Pipeline3DBackground: React.FC = () => {
 
     for (let i = 0; i < particleCount; i++) {
       positions[i * 3] = (Math.random() - 0.5) * 45;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 180; // Vertically spans all sections to bottom
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 60;
       positions[i * 3 + 2] = (Math.random() - 0.5) * 25 - 5;
 
       const mixColor = i % 3 === 0 ? colorCyan : i % 3 === 1 ? colorTeal : colorBlue;
@@ -95,6 +96,10 @@ export const Pipeline3DBackground: React.FC = () => {
       animId = requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
 
+      // Scroll Parallax Response (smoothly offset camera y as user scrolls down page)
+      const scrollY = window.scrollY;
+      camera.position.y = -scrollY * 0.003;
+
       // Rotate particle cloud gently
       particles.rotation.y = elapsed * 0.04;
       particles.rotation.x = Math.sin(elapsed * 0.03) * 0.05;
@@ -112,9 +117,8 @@ export const Pipeline3DBackground: React.FC = () => {
     animate();
 
     const handleResize = () => {
-      if (!container) return;
-      const w = container.clientWidth;
-      const h = container.clientHeight;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
@@ -136,5 +140,5 @@ export const Pipeline3DBackground: React.FC = () => {
     };
   }, []);
 
-  return <div ref={containerRef} className="absolute inset-0 pointer-events-none z-0 overflow-hidden" />;
+  return <div ref={containerRef} className="fixed inset-0 pointer-events-none z-0 overflow-hidden" />;
 };

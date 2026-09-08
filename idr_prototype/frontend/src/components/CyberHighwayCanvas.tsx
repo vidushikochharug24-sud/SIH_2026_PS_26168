@@ -12,6 +12,14 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  const scrollProgressRef = useRef(scrollProgress);
+  const isBlackoutRef = useRef(isBlackout);
+
+  useEffect(() => {
+    scrollProgressRef.current = scrollProgress;
+    isBlackoutRef.current = isBlackout;
+  }, [scrollProgress, isBlackout]);
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -41,7 +49,7 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
     dirLight.position.set(20, 40, 20);
     scene.add(dirLight);
 
-    // 2. Asphalt Road, Double Yellow Center Line & Sidewalks (Matching Reference Image)
+    // 2. Road & Center Lines
     const roadWidth = 12;
     const roadLength = 160;
     const roadGeom = new THREE.PlaneGeometry(roadWidth, roadLength);
@@ -51,7 +59,6 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
     roadMesh.position.set(0, -1, -40);
     scene.add(roadMesh);
 
-    // Double Yellow Center Divider Line (Matching Ref Image media_1788370346730.png)
     const doubleYellowGroup = new THREE.Group();
     const yellowGeom = new THREE.PlaneGeometry(0.18, roadLength);
     const yellowMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
@@ -59,7 +66,6 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
     const yellowR = new THREE.Mesh(yellowGeom, yellowMat); yellowR.rotation.x = -Math.PI / 2; yellowR.position.set(0.15, -0.96, -40); doubleYellowGroup.add(yellowR);
     scene.add(doubleYellowGroup);
 
-    // Dashed White Lane Dividers
     const dashCount = 26;
     const dashesGroup = new THREE.Group();
     const dashGeom = new THREE.PlaneGeometry(0.25, 2.5);
@@ -70,7 +76,6 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
     }
     scene.add(dashesGroup);
 
-    // Sidewalks & Red Curbs
     const sidewalkMat = new THREE.MeshPhongMaterial({ color: 0x334155 });
     const curbMat = new THREE.MeshPhongMaterial({ color: 0x7f1d1d });
 
@@ -79,7 +84,7 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
     const leftCurb = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.25, roadLength), curbMat); leftCurb.position.set(-6.15, -0.88, -40); scene.add(leftCurb);
     const rightCurb = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.25, roadLength), curbMat); rightCurb.position.set(6.15, -0.88, -40); scene.add(rightCurb);
 
-    // 3. 3D Architectural Buildings
+    // 3. Buildings
     const buildingGroup = new THREE.Group();
     const buildingColors = [0x0f172a, 0x1e1e24, 0x27272a, 0x1c1917];
     const windowLitMat = new THREE.MeshBasicMaterial({ color: 0xfef08a, transparent: true, opacity: 0.85 });
@@ -96,12 +101,10 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
       bMesh.position.set(side, height / 2 - 0.8, zPos);
       buildingGroup.add(bMesh);
 
-      // Roof Cap
       const roofMesh = new THREE.Mesh(new THREE.BoxGeometry(widthB + 0.8, 0.4, 7.8), new THREE.MeshPhongMaterial({ color: 0x475569 }));
       roofMesh.position.set(side, height - 0.6, zPos);
       buildingGroup.add(roofMesh);
 
-      // Windows
       for (let r = 0; r < 3; r++) {
         for (let c = 0; c < 3; c++) {
           const isLit = (r + c + b) % 3 === 0;
@@ -114,7 +117,7 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
     }
     scene.add(buildingGroup);
 
-    // 4. Classic 3D Double-Head Street Lamps
+    // 4. Street Lamps
     const lampsGroup = new THREE.Group();
     const poleGeom = new THREE.CylinderGeometry(0.08, 0.12, 4.2, 10);
     const poleMat = new THREE.MeshPhongMaterial({ color: 0x0f172a });
@@ -133,7 +136,7 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
     }
     scene.add(lampsGroup);
 
-    // 4.5. REALISTIC 3D TREES & BUSHES ALONG STREET SIDEWALKS
+    // 4.5. Vegetation
     const vegetationGroup = new THREE.Group();
     const trunkMat = new THREE.MeshPhongMaterial({ color: 0x3e2723, shininess: 5 });
     const leafMats = [
@@ -154,7 +157,6 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
       const isBush = t % 3 === 0;
 
       if (isBush) {
-        // 3D Bush / Shrub Cluster
         const bushCluster = new THREE.Group();
         const leafMat = leafMats[t % leafMats.length];
         
@@ -167,7 +169,6 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
         bushCluster.position.set(side, -0.7, zPos);
         vegetationGroup.add(bushCluster);
       } else {
-        // 3D Tree
         const tree = new THREE.Group();
         const trunk = new THREE.Mesh(trunkGeom, trunkMat);
         trunk.position.y = 0.9;
@@ -176,13 +177,11 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
         const leafMat = leafMats[t % leafMats.length];
 
         if (t % 2 === 0) {
-          // Rounded Foliage Tree
           const canopy = new THREE.Mesh(canopyGeom1, leafMat);
           canopy.position.y = 2.4;
           canopy.scale.set(1, 1.25, 1);
           tree.add(canopy);
         } else {
-          // Pine / Conical Layered Tree
           const cone1 = new THREE.Mesh(canopyGeom2, leafMat); cone1.position.y = 2.2; tree.add(cone1);
           const cone2 = new THREE.Mesh(canopyGeom2, leafMat); cone2.position.y = 3.0; cone2.scale.set(0.75, 0.75, 0.75); tree.add(cone2);
         }
@@ -193,22 +192,19 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
     }
     scene.add(vegetationGroup);
 
-    // 5. DETAILED 3D CAR VEHICLES MATCHING USER REFERENCE IMAGE (media_1788370346730.png)
+    // 5. 3D Cars
     const carsGroup = new THREE.Group();
     
-    // Builder for Realistic Sedan / Limousine matching ref image
     const createSedanCar = (colorHex: number, isLimo: boolean = false) => {
       const car = new THREE.Group();
       const length = isLimo ? 4.5 : 3.4;
 
-      // Lower Main Body (Glossy Sedan Finish)
       const bodyGeom = new THREE.BoxGeometry(1.5, 0.65, length);
       const bodyMat = new THREE.MeshPhongMaterial({ color: colorHex, shininess: 90 });
       const body = new THREE.Mesh(bodyGeom, bodyMat);
       body.position.y = 0.35;
       car.add(body);
 
-      // Sloped Roof Cabin & Windshield
       const roofLength = isLimo ? 2.8 : 1.8;
       const roofGeom = new THREE.BoxGeometry(1.25, 0.55, roofLength);
       const roofMat = new THREE.MeshPhongMaterial({ color: colorHex, shininess: 90 });
@@ -216,7 +212,6 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
       roof.position.set(0, 0.85, isLimo ? 0 : -0.2);
       car.add(roof);
 
-      // Tinted Glass Windows (Front & Rear)
       const glassMat = new THREE.MeshPhongMaterial({ color: 0x0f172a, shininess: 100 });
       const winFront = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.45), glassMat);
       winFront.rotation.x = -Math.PI / 4;
@@ -228,19 +223,16 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
       winRear.position.set(0, 0.9, roof.position.z + roofLength / 2 + 0.05);
       car.add(winRear);
 
-      // Red Taillight Bar
       const tailMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
       const tailMesh = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.15, 0.1), tailMat);
       tailMesh.position.set(0, 0.5, length / 2 + 0.02);
       car.add(tailMesh);
 
-      // License Plate
       const plateMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
       const plateMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.2), plateMat);
       plateMesh.position.set(0, 0.3, length / 2 + 0.03);
       car.add(plateMesh);
 
-      // 4 Wheels
       const wheelGeom = new THREE.CylinderGeometry(0.32, 0.32, 0.25, 16);
       const wheelMat = new THREE.MeshPhongMaterial({ color: 0x0f172a });
       const rimMat = new THREE.MeshPhongMaterial({ color: 0xe2e8f0 });
@@ -268,19 +260,18 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
       return car;
     };
 
-    // 4 Distinct Car Configurations matching user uploaded picture (media_1788370346730.png)
     const carConfigs = [
-      { color: 0x7c3aed, isLimo: true,  laneX: -4.2, speed: -14, initialZ: 10 }, // Purple Limo (Outer Left)
-      { color: 0x22c55e, isLimo: false, laneX: -1.6, speed: -14, initialZ: -10 }, // Green Sedan (Inner Left)
-      { color: 0xea580c, isLimo: false, laneX: 1.6,  speed: 14,  initialZ: 5 },  // Orange-Red Sedan (Inner Right)
-      { color: 0x94a3b8, isLimo: true,  laneX: 4.2,  speed: 14,  initialZ: -20 }, // Silver Grey Limo (Outer Right)
+      { color: 0x7c3aed, isLimo: true,  laneX: -4.2, speed: -14, initialZ: 10 },
+      { color: 0x22c55e, isLimo: false, laneX: -1.6, speed: -14, initialZ: -10 },
+      { color: 0xea580c, isLimo: false, laneX: 1.6,  speed: 14,  initialZ: 5 },
+      { color: 0x94a3b8, isLimo: true,  laneX: 4.2,  speed: 14,  initialZ: -20 },
     ];
 
     const carList: { mesh: THREE.Group; initialZ: number; speed: number; laneX: number }[] = [];
 
     carConfigs.forEach((cfg) => {
       const carMesh = createSedanCar(cfg.color, cfg.isLimo);
-      if (cfg.speed < 0) carMesh.rotation.y = Math.PI; // Face oncoming direction for left lanes
+      if (cfg.speed < 0) carMesh.rotation.y = Math.PI;
       carMesh.position.set(cfg.laneX, -0.6, cfg.initialZ);
       carsGroup.add(carMesh);
       carList.push({ mesh: carMesh, initialZ: cfg.initialZ, speed: cfg.speed, laneX: cfg.laneX });
@@ -288,7 +279,7 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
 
     scene.add(carsGroup);
 
-    // 6. Active Vehicle Trajectory Path Line
+    // 6. Trajectory Line & Beam
     const trajPoints: THREE.Vector3[] = [];
     for (let i = 0; i <= 80; i++) {
       const z = 15 - i * 1.5;
@@ -300,7 +291,6 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
     const trajLine = new THREE.Line(trajGeom, trajMat);
     scene.add(trajLine);
 
-    // Satellite Beam Stream
     const beamGroup = new THREE.Group();
     const beamGeom = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(0, 18, -10),
@@ -312,7 +302,6 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
     beamGroup.add(beamLine);
     scene.add(beamGroup);
 
-    // Radar Target Crosshair Ring HUD
     const ringGeom = new THREE.RingGeometry(0.7, 0.95, 32);
     const ringMat = new THREE.MeshBasicMaterial({ color: 0x2EE6A6, transparent: true, opacity: 0.9, side: THREE.DoubleSide });
     const hudRing = new THREE.Mesh(ringGeom, ringMat);
@@ -320,7 +309,6 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
     hudRing.position.set(0, -0.85, 0);
     scene.add(hudRing);
 
-    // Pointer Parallax
     let targetMouseX = 0, targetMouseY = 0;
     let currentMouseX = 0, currentMouseY = 0;
 
@@ -330,7 +318,6 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
     };
     window.addEventListener('pointermove', handlePointer);
 
-    // Resize Handler
     const handleResize = () => {
       if (!container) return;
       const w = container.clientWidth;
@@ -349,22 +336,20 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
       animId = requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
 
-      // Smooth Lerp Interpolation
       currentMouseX += (targetMouseX - currentMouseX) * 0.06;
       currentMouseY += (targetMouseY - currentMouseY) * 0.06;
 
-      const zOffset = scrollProgress * 55;
+      const sp = scrollProgressRef.current;
+      const zOffset = sp * 55;
       camera.position.z = 14 - zOffset * 0.5;
       camera.position.x = currentMouseX * 0.5;
       camera.position.y = 3.2 - currentMouseY * 0.3;
       camera.lookAt(0, 0, -30 - zOffset * 0.5);
 
-      // Animate center white dashes
       dashesGroup.position.z = (elapsed * 6) % 6;
 
-      // Animate 3D Cars driven by Scroll Progress & Time!
       carList.forEach((carItem) => {
-        const scrollDrive = scrollProgress * 60;
+        const scrollDrive = sp * 60;
         let newZ = carItem.initialZ - (elapsed * carItem.speed) - scrollDrive;
         
         if (newZ < -110) newZ += 130;
@@ -373,12 +358,10 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
         carItem.mesh.position.z = newZ;
       });
 
-      // Pulse HUD ring
       const scale = 1 + Math.sin(elapsed * 4) * 0.12;
       hudRing.scale.set(scale, scale, 1);
 
-      // Hide satellite beam in blackout
-      beamGroup.visible = !isBlackout;
+      beamGroup.visible = !isBlackoutRef.current;
 
       renderer.render(scene, camera);
     };
@@ -403,7 +386,7 @@ export const CyberHighwayCanvas: React.FC<CyberHighwayCanvasProps> = ({
       ringGeom.dispose(); ringMat.dispose();
       renderer.dispose();
     };
-  }, [scrollProgress, isBlackout]);
+  }, []); // Mounts ONCE! Never tears down on scroll!
 
   return (
     <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">

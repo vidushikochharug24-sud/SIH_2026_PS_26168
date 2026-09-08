@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
 interface InteractiveEarthCanvasProps {
@@ -15,7 +15,19 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
   onZoomComplete,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [hovered, setHovered] = useState(false);
+
+  // Keep refs for callback props so useEffect never tears down on prop changes
+  const onEarthClickRef = useRef(onEarthClick);
+  const onHoverStateChangeRef = useRef(onHoverStateChange);
+  const isZoomingToStreetRef = useRef(isZoomingToStreet);
+  const onZoomCompleteRef = useRef(onZoomComplete);
+
+  useEffect(() => {
+    onEarthClickRef.current = onEarthClick;
+    onHoverStateChangeRef.current = onHoverStateChange;
+    isZoomingToStreetRef.current = isZoomingToStreet;
+    onZoomCompleteRef.current = onZoomComplete;
+  });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -26,10 +38,9 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
 
     // 1. Scene & Camera Setup - Dark Prussian Blue background
     const scene = new THREE.Scene();
-    scene.background = null; // Transparent background over dark container
+    scene.background = null;
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    // Position camera to view half-Earth in bottom 40-50% of viewport
     camera.position.set(0, -1.8, 8.5);
     camera.lookAt(0, -2.5, 0);
 
@@ -52,7 +63,7 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
 
     // 3. Earth Group Setup
     const earthGroup = new THREE.Group();
-    earthGroup.position.set(0, -3.2, 0); // Positioned in lower portion of screen
+    earthGroup.position.set(0, -3.2, 0);
     scene.add(earthGroup);
 
     // Create Canvas Texture for Landmasses & Night City Lights
@@ -72,7 +83,6 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
       ctx.shadowColor = '#00E6B8';
       ctx.shadowBlur = 12;
 
-      // Draw stylized continent blobs
       const drawBlob = (cx: number, cy: number, r: number) => {
         ctx.beginPath();
         for (let a = 0; a < Math.PI * 2; a += 0.2) {
@@ -86,20 +96,14 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
         ctx.fill();
       };
 
-      // North America
-      drawBlob(250, 180, 75);
-      // South America
-      drawBlob(320, 340, 60);
-      // Europe & Asia
-      drawBlob(600, 160, 110);
-      // Africa
-      drawBlob(540, 290, 80);
-      // Australia
-      drawBlob(820, 360, 45);
-      // India / South Asia Highlight
-      drawBlob(680, 230, 40);
+      drawBlob(250, 180, 75);  // North America
+      drawBlob(320, 340, 60);  // South America
+      drawBlob(600, 160, 110); // Europe & Asia
+      drawBlob(540, 290, 80);  // Africa
+      drawBlob(820, 360, 45);  // Australia
+      drawBlob(680, 230, 40);  // India
 
-      // City Lights (Glowing Dots)
+      // City Lights
       ctx.fillStyle = '#FFFFFF';
       for (let i = 0; i < 400; i++) {
         const x = Math.random() * cvs.width;
@@ -187,7 +191,6 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
     const satBody = new THREE.Mesh(bodyGeom, bodyMat);
     satGroup.add(satBody);
 
-    // Solar Panels
     const panelGeom = new THREE.BoxGeometry(0.8, 0.02, 0.25);
     const panelMat = new THREE.MeshBasicMaterial({ color: 0x00D9FF });
     const panels = new THREE.Mesh(panelGeom, panelMat);
@@ -197,7 +200,6 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
 
     // 7. Location Pin & Signal Pulse Rings
     const pinGroup = new THREE.Group();
-    // Position pin near India lat/lng on Earth surface
     const lat = 28.6139 * (Math.PI / 180);
     const lng = 77.2090 * (Math.PI / 180);
     const r = 3.53;
@@ -206,13 +208,11 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
     const pz = r * Math.cos(lat) * Math.cos(lng);
     pinGroup.position.set(px, py, pz);
 
-    // Glowing Pin Circle
     const pinGeom = new THREE.SphereGeometry(0.12, 16, 16);
     const pinMat = new THREE.MeshBasicMaterial({ color: 0x00E6B8 });
     const pinMesh = new THREE.Mesh(pinGeom, pinMat);
     pinGroup.add(pinMesh);
 
-    // Expanding Cyan Signal Waves
     const signalRings: THREE.Mesh[] = [];
     for (let i = 0; i < 3; i++) {
       const ringG = new THREE.RingGeometry(0.08, 0.12, 32);
@@ -229,10 +229,11 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
     }
     earthGroup.add(pinGroup);
 
-    // 8. Raycaster for Hover & Click + Manual Left/Right Pointer Drag
+    // 8. Raycaster for Hover & Click + Drag Rotation
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2(-100, -100);
 
+    let isHovered = false;
     let isDragging = false;
     let startX = 0;
     let targetRotationY = 0;
@@ -264,8 +265,12 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
       const intersects = raycaster.intersectObjects([earthMesh, pinMesh]);
 
       const isHit = intersects.length > 0;
-      setHovered(isHit);
-      if (onHoverStateChange) onHoverStateChange(isHit);
+      if (isHit !== isHovered) {
+        isHovered = isHit;
+        if (onHoverStateChangeRef.current) {
+          onHoverStateChangeRef.current(isHit);
+        }
+      }
 
       if (isDragging) {
         const deltaX = clientX - startX;
@@ -285,8 +290,7 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
       isDragging = false;
       document.body.style.cursor = 'default';
 
-      if (!hasDragged && onEarthClick) {
-        // If it was a clean click (not a drag), trigger earth click
+      if (!hasDragged && onEarthClickRef.current) {
         const rect = container.getBoundingClientRect();
         const clientX = 'changedTouches' in e ? e.changedTouches[0].clientX : (e as MouseEvent).clientX;
         const clientY = 'changedTouches' in e ? e.changedTouches[0].clientY : (e as MouseEvent).clientY;
@@ -296,7 +300,7 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects([earthMesh, pinMesh]);
         if (intersects.length > 0) {
-          onEarthClick();
+          onEarthClickRef.current();
         }
       }
     };
@@ -320,7 +324,7 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
       animId = requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
 
-      // Earth rotation: auto spin + smooth drag inertia
+      // Earth rotation
       if (!isDragging) {
         targetRotationY += 0.0015;
       }
@@ -345,19 +349,19 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
       // Hover response
       atmosUniforms.intensity.value = THREE.MathUtils.lerp(
         atmosUniforms.intensity.value,
-        hovered ? 2.2 : 1.2,
+        isHovered ? 2.2 : 1.2,
         0.1
       );
 
-      // Camera Zoom Animation into Earth Surface on Click / Transition
-      if (isZoomingToStreet) {
+      // Camera Zoom Animation into Earth Surface
+      if (isZoomingToStreetRef.current) {
         zoomProgress += 0.025;
         camera.position.z = THREE.MathUtils.lerp(camera.position.z, 0.4, 0.08);
         camera.position.y = THREE.MathUtils.lerp(camera.position.y, -3.1, 0.08);
         camera.position.x = THREE.MathUtils.lerp(camera.position.x, px * 0.8, 0.08);
         
-        if (zoomProgress >= 1.2 && onZoomComplete) {
-          onZoomComplete();
+        if (zoomProgress >= 1.2 && onZoomCompleteRef.current) {
+          onZoomCompleteRef.current();
         }
       }
 
@@ -366,7 +370,6 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
 
     animate();
 
-    // Resize Handler
     const handleResize = () => {
       if (!container) return;
       const w = container.clientWidth;
@@ -399,8 +402,7 @@ export const InteractiveEarthCanvas: React.FC<InteractiveEarthCanvasProps> = ({
       pinGeom.dispose(); pinMat.dispose();
       renderer.dispose();
     };
-  }, [hovered, isZoomingToStreet, onEarthClick, onHoverStateChange, onZoomComplete]);
+  }, []); // Empty dependency array -> Mounts ONCE!
 
   return <div ref={containerRef} className="w-full h-full min-h-[480px] cursor-grab active:cursor-grabbing" />;
 };
-
