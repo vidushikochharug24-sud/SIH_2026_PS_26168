@@ -11,7 +11,7 @@
 - **PS Title:** AI-ML based Intelligent Dead Reckoning system for seamless navigation
 - **Organization:** Indian Space Research Organisation (ISRO)
 - **Category:** Software
-- **Theme:** Miscellaneous
+- **Theme:** Smart Vehicles
 - **Team Name:** RuntimeRebels
 
 ### 👥 Team Details
