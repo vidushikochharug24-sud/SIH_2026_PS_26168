@@ -20,6 +20,8 @@
   - Aryan Bansal ([@aryanbansal2124](https://github.com/aryanbansal2124))
   - Vidushi Kochhar ([@vidushikochharug24-sud](https://github.com/vidushikochharug24-sud))
   - Palak Sachdeva ([@palaksachdeva](https://github.com/palaksachdeva))
+  - Utkarsh Kumar ([@Falsistic](https://github.com/Falsistic))
+  - Rahul Gupta ([@rahul01gupta11](https://github.com/rahul01gupta11))
 
 ---
 
